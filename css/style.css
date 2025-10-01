@@ -1,0 +1,307 @@
+@charset "UTF-8";
+
+@font-face {
+  font-family: "Satoshi-Variable";
+  src: url("../fonts/Satoshi-Variable.woff2") format("woff2"),
+    url("../fonts/Satoshi-Variable.woff") format("woff"),
+    url("../fonts/Satoshi-Variable.ttf") format("truetype");
+  font-weight: 300 900;
+  font-display: swap;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Satoshi-VariableItalic";
+  src: url("../fonts/Satoshi-VariableItalic.woff2") format("woff2"),
+    url("../fonts/Satoshi-VariableItalic.woff") format("woff"),
+    url("../fonts/Satoshi-VariableItalic.ttf") format("truetype");
+  font-weight: 300 900;
+  font-display: swap;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: "Sentient-Variable";
+  src: url("../fonts/Sentient-Variable.woff2") format("woff2"),
+    url("../fonts/Sentient-Variable.woff") format("woff"),
+    url("../fonts/Sentient-Variable.ttf") format("truetype");
+  font-weight: 200 700;
+  font-display: swap;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Sentient-VariableItalic";
+  src: url("../fonts/Sentient-VariableItalic.woff2") format("woff2"),
+    url("../fonts/Sentient-VariableItalic.woff") format("woff"),
+    url("../fonts/Sentient-VariableItalic.ttf") format("truetype");
+  font-weight: 200 700;
+  font-display: swap;
+  font-style: italic;
+}
+
+:root {
+  /* --main-color: #083d81;  */
+  --main-color: #0027c2;
+
+  --slide-media-max-height: 500px;
+  --secondary-color: #b8bde3; /* Secondary color for hover effects */
+  --background-color: #e8e8e8;
+  --highlight-color: rgb(252, 255, 85);
+  --main-font: "Rowan", serif;
+
+  /* url("../fonts/Rowan-VariableItalic.ttf") format("ttf"); */
+}
+
+body {
+  padding: 0.1rem;
+  background: var(--background-color);
+  color: var(--main-color);
+  /* font-family: "Helvetica Neue", sans-serif; */
+  font-family: "Sentient-Variable", serif;
+  /* font-weight: 400; */
+  font-style: normal;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  /* align-items: center; */
+  /* padding-bottom: 4rem; */
+  border-bottom: none; /* ← changed from 1px solid #ddd */
+  /* font-size: 1.2rem; */
+  text-transform: lowercase;
+  font-size: 1.5rem;
+  font-family: "Satoshi-Variable", sans-serif;
+  font-weight: 400;
+}
+
+h1,
+h2 {
+  font-size: 1.5rem;
+  font-weight: 400;
+  margin: 0;
+  padding: 0;
+}
+h2 {
+  /* font-size: 1rem; */
+  /* font-style: italic; */
+  font-weight: 300;
+}
+
+.header-left,
+.header-right a {
+  /* font-weight: bold; */
+  color: var(--main-color);
+  text-decoration: none;
+  /* font-style: italic; */
+}
+.header-right a {
+  font-style: normal;
+}
+.header-left {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* keep left aligned */
+}
+
+h1:hover,
+.header-right a:hover {
+  background-color: var(--highlight-color);
+  transition: background 0.2s ease;
+}
+
+#project-list {
+  position: absolute; /* place relative to the viewport */
+  bottom: 0;
+  left: 0;
+  width: 50%;
+  height: 50vh;
+  overflow-y: auto;
+  padding-left: 1rem;
+  margin-bottom: 1rem;
+}
+
+.project {
+  cursor: pointer;
+}
+
+.project-title {
+  /* font-size: 1.2rem; */
+  font-weight: 300;
+  display: block;
+  cursor: pointer;
+  margin: 0;
+  padding: 0;
+  /* line-height: 1;  */
+}
+
+.title-number {
+  /* display: inline-block; */
+  /* margin-right: 0.5rem; */
+  font-family: "Satoshi-Variable", sans-serif;
+  font-weight: 400;
+  font-size: 1rem;
+  /* color: var(--main-color); */
+}
+.title-number,
+.title-text {
+  display: inline; /* put number and title on same line */
+  margin-right: 2rem;
+}
+
+.title-text {
+  font-size: 1rem;
+  /* display: block; */
+  font-weight: 400;
+  /* margin-bottom: 0.25rem; */
+}
+
+.title-meta-wrapper {
+  display: block;
+  /* margin-left: 4rem; */
+}
+.title-meta {
+  /* display: block; */
+  font-weight: 300;
+  font-size: 1rem;
+  font-style: italic;
+  margin-left: 4rem;
+}
+.project-title:hover .title-number,
+.project-title:hover .title-text,
+.project-title:hover .title-meta {
+  background-color: var(--highlight-color);
+  /* color: var(--main-color); */
+  /* border-radius: 2px; */
+  /* padding: 0 0.2rem; */
+  transition: background 0.2s ease;
+}
+
+.project.expanded .title-number,
+.project.expanded .title-text,
+.project.expanded .title-meta {
+  background-color: var(--highlight-color);
+  transition: background 0.2s ease;
+}
+
+/* .project-title:hover {
+  background-color: rgb(252, 255, 85);
+  font-weight: 600;
+} */
+
+#project-expanded {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 100%;
+  height: 100vh;
+  /* display: flex; */
+  /* flex-direction: column; */
+  /* justify-content: flex-start; */
+  /* align-items: center; */
+  pointer-events: none; /* prevent blocking project list */
+}
+
+#expanded-media {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  pointer-events: auto; /* allow interaction with slides */
+  cursor: default;
+}
+
+#expanded-text {
+  /* align-self: flex-end; */
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  /* margin: 1rem; */
+  pointer-events: auto;
+  width: 33.33vw;
+  /* max-width: 400px; */
+}
+
+.project-text {
+  font-size: 0.8rem;
+  font-weight: 300;
+  text-align: right;
+}
+.project-description {
+  margin: 1rem;
+}
+
+/* .project-media {
+  grid-area: media;
+  position: relative;
+  display: block;
+} */
+
+#expanded-media img,
+#expanded-media video {
+  max-width: 100%;
+  max-height: 75vh;
+  margin: 0 3rem;
+  /* display: block; */
+  object-fit: contain;
+  object-position: center;
+}
+
+/* Custom cursor for previous slide (left side) */
+/* Left arrow (outline) */
+.project-media.cursor-left {
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" stroke="%23fcff55" stroke-width="1.5" fill="none" stroke-linecap="square" stroke-linejoin="square"><polyline points="15 18 9 12 15 6"/></svg>')
+      20 20,
+    auto;
+}
+
+/* Right arrow (outline) */
+.project-media.cursor-right {
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" stroke="%23fcff55" stroke-width="1.5" fill="none" stroke-linecap="square" stroke-linejoin="square"><polyline points="9 6 15 12 9 18"/></svg>')
+      20 20,
+    auto;
+}
+
+/* Dim any project that isn’t active */
+/* .project.inactive .project-title,
+.project.inactive .project-text,
+.project.inactive .slide-controls {
+  color: var(--secondary-color);
+  opacity: 0.6;
+} */
+
+/* Overlay for zoom mode */
+#media-zoom-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(232, 232, 232, 0); /* dark overlay */
+  display: flex;
+  /* opacity: 0; */
+  justify-content: center;
+  align-items: center;
+  pointer-events: none; /* disabled until active */
+  z-index: 1000;
+  transition: background-color 0.4s ease;
+}
+
+#media-zoom-overlay.active {
+  background-color: rgba(232, 232, 232, 0.7); /* final overlay shade */
+  pointer-events: auto;
+}
+
+#media-zoom-overlay img,
+#media-zoom-overlay video {
+  position: absolute;
+  transition: all 0.5s ease; /* smooth enlargement */
+  object-fit: contain;
+  object-position: center;
+  z-index: 1001;
+}
