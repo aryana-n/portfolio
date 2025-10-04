@@ -1,64 +1,40 @@
 @charset "UTF-8";
 
 @font-face {
-  font-family: "Satoshi-Variable";
-  src: url("../fonts/Satoshi-Variable.woff2") format("woff2"),
-    url("../fonts/Satoshi-Variable.woff") format("woff"),
-    url("../fonts/Satoshi-Variable.ttf") format("truetype");
-  font-weight: 300 900;
-  font-display: swap;
+  font-family: "Junicode";
+  src: url("../fonts/Junicode.woff") format("woff"),
+    url("../fonts/Junicode.ttf") format("truetype");
+  font-weight: 400;
+  /* font-display: swap; */
   font-style: normal;
 }
-
 @font-face {
-  font-family: "Satoshi-VariableItalic";
-  src: url("../fonts/Satoshi-VariableItalic.woff2") format("woff2"),
-    url("../fonts/Satoshi-VariableItalic.woff") format("woff"),
-    url("../fonts/Satoshi-VariableItalic.ttf") format("truetype");
-  font-weight: 300 900;
-  font-display: swap;
-  font-style: italic;
-}
-
-@font-face {
-  font-family: "Sentient-Variable";
-  src: url("../fonts/Sentient-Variable.woff2") format("woff2"),
-    url("../fonts/Sentient-Variable.woff") format("woff"),
-    url("../fonts/Sentient-Variable.ttf") format("truetype");
-  font-weight: 200 700;
-  font-display: swap;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: "Sentient-VariableItalic";
-  src: url("../fonts/Sentient-VariableItalic.woff2") format("woff2"),
-    url("../fonts/Sentient-VariableItalic.woff") format("woff"),
-    url("../fonts/Sentient-VariableItalic.ttf") format("truetype");
-  font-weight: 200 700;
-  font-display: swap;
+  font-family: "JunicodeItalic";
+  src: url("../fonts/Junicode-Italic.woff") format("woff"),
+    url("../fonts/Junicode-Italic.ttf") format("truetype");
+  font-weight: 400;
+  /* font-display: swap; */
   font-style: italic;
 }
 
 :root {
-  /* --main-color: #083d81;  */
-  --main-color: #0027c2;
+  /* --main-color: #0027c2;  */
+  --main-color: #333;
 
   --slide-media-max-height: 500px;
-  --secondary-color: #b8bde3; /* Secondary color for hover effects */
+  --secondary-color: #868686; /* Secondary color for hover effects */
   --background-color: #e8e8e8;
-  --highlight-color: rgb(252, 255, 85);
-  --main-font: "Rowan", serif;
+  --highlight-color: #d5d5d5;
 
   /* url("../fonts/Rowan-VariableItalic.ttf") format("ttf"); */
 }
 
 body {
   padding: 0.1rem;
-  background: var(--background-color);
+  /* background: var(--background-color); */
   color: var(--main-color);
   /* font-family: "Helvetica Neue", sans-serif; */
-  font-family: "Sentient-Variable", serif;
+  font-family: "Junicode", serif;
   /* font-weight: 400; */
   font-style: normal;
 }
@@ -70,18 +46,21 @@ header {
   /* padding-bottom: 4rem; */
   border-bottom: none; /* ← changed from 1px solid #ddd */
   /* font-size: 1.2rem; */
-  text-transform: lowercase;
-  font-size: 1.5rem;
-  font-family: "Satoshi-Variable", sans-serif;
+  /* text-transform: lowercase; */
+  font-size: 1rem;
+  font-family: "Junicode", serif;
   font-weight: 400;
 }
 
 h1,
 h2 {
-  font-size: 1.5rem;
+  font-size: 1rem;
   font-weight: 400;
   margin: 0;
   padding: 0;
+}
+h1 {
+  text-transform: uppercase;
 }
 h2 {
   /* font-size: 1rem; */
@@ -105,25 +84,26 @@ h2 {
   align-items: flex-start; /* keep left aligned */
 }
 
-h1:hover,
+/* h1:hover,
 .header-right a:hover {
   background-color: var(--highlight-color);
   transition: background 0.2s ease;
-}
+} */
 
 #project-list {
-  position: absolute; /* place relative to the viewport */
+  position: relative; /* place relative to the viewport */
   bottom: 0;
   left: 0;
-  width: 50%;
-  height: 50vh;
-  overflow-y: auto;
-  padding-left: 1rem;
-  margin-bottom: 1rem;
+  width: 20%;
+  /* height: 50vh; */
+  /* overflow-y: auto; */
+  /* padding-left: 1rem; */
+  margin-top: 1rem;
 }
 
 .project {
   cursor: pointer;
+  margin-bottom: 0.5rem;
 }
 
 .project-title {
@@ -136,54 +116,33 @@ h1:hover,
   /* line-height: 1;  */
 }
 
-.title-number {
-  /* display: inline-block; */
-  /* margin-right: 0.5rem; */
-  font-family: "Satoshi-Variable", sans-serif;
-  font-weight: 400;
-  font-size: 1rem;
-  /* color: var(--main-color); */
+.project-header {
+  display: flex;
+  justify-content: space-between; /* pushes title left, year right */
+  align-items: baseline; /* keeps them aligned nicely */
 }
-.title-number,
-.title-text {
-  display: inline; /* put number and title on same line */
-  margin-right: 2rem;
-}
-
-.title-text {
-  font-size: 1rem;
-  /* display: block; */
-  font-weight: 400;
-  /* margin-bottom: 0.25rem; */
+.project:hover .project-title,
+.project:hover .title-year {
+  background-color: var(--highlight-color);
+  /* underline */
+  text-decoration: underline;
+  /* transition: background 0.2s ease; */
 }
 
-.title-meta-wrapper {
-  display: block;
-  /* margin-left: 4rem; */
-}
-.title-meta {
-  /* display: block; */
-  font-weight: 300;
+.title-type {
   font-size: 1rem;
   font-style: italic;
-  margin-left: 4rem;
-}
-.project-title:hover .title-number,
-.project-title:hover .title-text,
-.project-title:hover .title-meta {
-  background-color: var(--highlight-color);
-  /* color: var(--main-color); */
-  /* border-radius: 2px; */
-  /* padding: 0 0.2rem; */
-  transition: background 0.2s ease;
+  color: var(--secondary-color);
+  /* margin-top: 0.2rem; */
 }
 
-.project.expanded .title-number,
-.project.expanded .title-text,
-.project.expanded .title-meta {
+/* .project-template:hover .project-title,
+.project-template .title-type,
+.project-template .title-year {
   background-color: var(--highlight-color);
+
   transition: background 0.2s ease;
-}
+} */
 
 /* .project-title:hover {
   background-color: rgb(252, 255, 85);
@@ -245,8 +204,8 @@ h1:hover,
 #expanded-media img,
 #expanded-media video {
   max-width: 100%;
-  max-height: 75vh;
-  margin: 0 3rem;
+  max-height: 60vh;
+  /* margin: 0 3rem; */
   /* display: block; */
   object-fit: contain;
   object-position: center;
@@ -254,26 +213,37 @@ h1:hover,
 
 /* Custom cursor for previous slide (left side) */
 /* Left arrow (outline) */
-.project-media.cursor-left {
-  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" stroke="%23fcff55" stroke-width="1.5" fill="none" stroke-linecap="square" stroke-linejoin="square"><polyline points="15 18 9 12 15 6"/></svg>')
-      20 20,
+body.cursor-left {
+  cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' height='32' width='64'><text x='0' y='24' font-size='17'  font-family='Junicode' fill='black'> ( PREV )</text></svg>")
+      0 0,
     auto;
 }
 
-/* Right arrow (outline) */
-.project-media.cursor-right {
-  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" stroke="%23fcff55" stroke-width="1.5" fill="none" stroke-linecap="square" stroke-linejoin="square"><polyline points="9 6 15 12 9 18"/></svg>')
-      20 20,
+body.cursor-right {
+  cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' height='32' width='64'><text x='0' y='24' font-size='17' font-family='Junicode' fill='black'> ( NEXT )</text></svg>")
+      0 0,
     auto;
 }
 
-/* Dim any project that isn’t active */
-/* .project.inactive .project-title,
-.project.inactive .project-text,
-.project.inactive .slide-controls {
-  color: var(--secondary-color);
-  opacity: 0.6;
-} */
+#project-hover-preview {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); /* center like expanded media */
+  pointer-events: none; /* doesn’t block clicks */
+  z-index: 500;
+  display: none;
+  max-width: 90%; /* match expanded media sizing */
+  max-height: 75vh;
+}
+
+#project-hover-preview img,
+#project-hover-preview video {
+  width: 100%;
+  height: 75vh;
+  object-fit: contain;
+  object-position: center;
+}
 
 /* Overlay for zoom mode */
 #media-zoom-overlay {
@@ -288,12 +258,12 @@ h1:hover,
   justify-content: center;
   align-items: center;
   pointer-events: none; /* disabled until active */
-  z-index: 1000;
-  transition: background-color 0.4s ease;
+  z-index: 999;
+  transition: background-color 0.7s ease;
 }
 
 #media-zoom-overlay.active {
-  background-color: rgba(232, 232, 232, 0.7); /* final overlay shade */
+  background-color: rgba(255, 255, 255); /* final overlay shade */
   pointer-events: auto;
 }
 
@@ -303,5 +273,55 @@ h1:hover,
   transition: all 0.5s ease; /* smooth enlargement */
   object-fit: contain;
   object-position: center;
+
   z-index: 1001;
+}
+
+#overlay-close {
+  display: none;
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  font-size: 1rem;
+  font-weight: bold;
+  color: black;
+  cursor: pointer;
+  z-index: 1100; /* above media */
+  user-select: none;
+  transition: color 0.5s ease;
+  /* capitalize */
+  text-transform: uppercase;
+}
+
+#overlay-close:hover {
+  background-color: var(--highlight-color);
+  text-decoration: underline;
+}
+
+#media-zoom-overlay.active #overlay-close {
+  display: block; /* show only when overlay is active */
+}
+#overlay-text {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  width: 20%;
+  /* padding: 1rem; */
+  color: rgb(0, 0, 0);
+  font-family: Junicode, serif;
+  z-index: 1100;
+  font-size: 1rem;
+}
+
+#overlay-text .overlay-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  /* margin-bottom: 0.5rem; */
+}
+
+#overlay-text .overlay-type {
+  font-style: italic;
+  color: var(--secondary-color);
+  margin-bottom: 1rem;
 }

@@ -17,20 +17,40 @@
     <header>
       <div class="header-left" id="my-name">
         <h1>Aryana Noorani</h1>
-        <h2>Media and Interaction Designer</h2>
+        <h2>Interactive Media Designer</h2>
       </div>
       <div class="header-right">
-        <a href="mailto:nooraniaryana@gmail.com"> <h1>Info / Contact</h1></a>
+        <a href="mailto:nooraniaryana@gmail.com"> <h2>Info</h2></a>
       </div>
     </header>
 
     <main>
-      <div id="project-list"></div>
-      <div id="project-expanded">
-        <div id="expanded-media"></div>
-        <div id="expanded-text"></div>
+      <div id="project-list">
+        <div class="project template" style="display: none">
+          <div class="project-header">
+            <div class="project-title"></div>
+            <div class="title-year"></div>
+          </div>
+          <div class="title-type"></div>
+        </div>
       </div>
-      <div id="media-zoom-overlay"></div>
+      <!-- <div id="project-hover-preview"></div> -->
+
+      <div id="expanded-media"></div>
+      <!-- <div id="project-expanded">
+        <div id="expanded-text"></div>
+      </div> -->
+      <div id="media-zoom-overlay">
+        <div id="overlay-close">( Close )</div>
+        <div id="overlay-text">
+          <div class="overlay-header">
+            <div class="overlay-title"></div>
+            <div class="overlay-year"></div>
+          </div>
+          <div class="overlay-type"></div>
+          <div class="overlay-description"></div>
+        </div>
+      </div>
     </main>
     <script type="module" src="js/main.js"></script>
   </body>

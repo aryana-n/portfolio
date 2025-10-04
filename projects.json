@@ -8,56 +8,56 @@
   },
   {
     "title": "Rendez-vous 2030",
-    "type": "Website",
+    "type": "Web Design",
     "year": "2025",
     "description": "Website promoting the UN’s 2030 Sustainable Development Goals for younger audiences. Visitors explore an animated city to learn about each goal, with content focused on the Swiss context.",
     "media": ["images/rendez1.mp4", "images/rendez2.png", "images/rendez3.png"]
   },
   {
     "title": "Hello World",
-    "type": "3D Animation",
+    "type": "3D, Motion Design",
     "year": "2024",
     "description": "Music clip for “Hello World” by Rouge Hotel, unfolding a story through puppet-like animated figures.",
     "media": ["images/hello1.mp4"]
   },
   {
     "title": "Cozy Fort",
-    "type": "Augmented Reality Experience",
+    "type": "AR Experience, 3D",
     "year": "2024",
     "description": "This experience spawns a blanket fort under any table. Participants crawl underneath to explore a space filled with toys and objects reminiscent of childhood.",
     "media": ["images/Cozyfort.mp4"]
   },
   {
     "title": "Jupiter 7",
-    "type": "Website",
+    "type": "Web Design",
     "year": "2024",
     "description": "Created for the fictional cult “Children of Elara,” this project uses a four-scroll layout where elements snap together to reveal images, buttons, and text.",
     "media": ["images/jupiter1.png", "images/jupiter3.mp4", "images/jupiter2.png"]
   },
    {
     "title": "Liminal Dreams",
-    "type": "3D Animation, Virtual Reality",
+    "type": "3D, VR",
     "year": "2024",
     "description": "A journey through abandoned, once-familiar spaces, evoking nostalgia and the lingering presence of childhood memories.",
     "media": ["images/liminal1.png", "images/liminal2.png", "images/liminal3.png", "images/liminal4.png", "images/liminal5.png", "images/liminal6.png"]
   },
   {
     "title": "The Surveillance Desk",
-    "type": "Website",
+    "type": "Web Design",
     "year": "2025",
     "description": "This platform generates short stories from surveillance clips using AI. Users can choose the genre and remix the narrative.",
     "media": [ "images/surveillance2.mp4", "images/surveillance1.jpg"]
   },
   {
     "title": "Fishtank",
-    "type": "3D Animation",
+    "type": "3D",
     "year": "2023",
     "description": "Short, looping animation following Slimy Stu and his friends swimming through a playful, VR-sculpted environment.",
     "media": ["images/fishtank.mp4"]
   },
   {
     "title": "Past / Future",
-    "type": "3D Animation",
+    "type": "3D",
     "year": "2023",
     "description": "A short film imagining a barren landscape reclaimed by greenery, where remnants of human activity meet the slow persistence of nature.",
     "media": ["images/past-future1.mp4", "images/past-future2.png", "images/past-future3.png"]

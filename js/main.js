@@ -7,201 +7,267 @@ document.addEventListener("DOMContentLoaded", (event) => {
 
 function renderProjects(projects) {
   const container = document.getElementById("project-list");
+  const template = container.querySelector(".project.template");
+
   const expandedMediaContainer = document.getElementById("expanded-media");
   const expandedTextContainer = document.getElementById("expanded-text");
+  const zoomOverlay = document.getElementById("media-zoom-overlay");
+
+  const hoverPreview = document.getElementById("project-hover-preview");
 
   projects.forEach((project, index) => {
-    const wrapper = document.createElement("div");
-    wrapper.classList.add("project");
+    // Clone template
+    const wrapper = template.cloneNode(true);
+    wrapper.classList.remove("template");
+    wrapper.style.display = ""; // make it visible
 
-    // --- Project title ---
-    const title = document.createElement("div");
-    title.classList.add("project-title");
-    title.innerHTML = `
-      <span class="title-number">${index + 1}</span>
-      <span class="title-text">${project.title}</span>
-      <span class="title-meta-wrapper">
-        <span class="title-meta">${project.type}</span><br>
-        <span class="title-meta">${project.year}</span>
-      </span>
-    `;
+    // Fill in content
+    wrapper.querySelector(".project-title").textContent = project.title;
+    wrapper.querySelector(".title-year").textContent = project.year;
+    wrapper.querySelector(".title-type").textContent = project.type;
 
-    title.addEventListener("click", () => {
-      const isCurrentlyOpen = wrapper.classList.contains("expanded");
+    // Fill overlay text content
 
-      // Close all projects
-      document
-        .querySelectorAll(".project")
-        .forEach((p) => p.classList.remove("expanded", "inactive"));
+    wrapper.addEventListener("mouseenter", () => {
+      if (!project.media || !project.media.length) return;
 
-      // Clear previous expanded content
-      expandedMediaContainer.innerHTML = "";
-      expandedTextContainer.innerHTML = "";
-
-      if (!isCurrentlyOpen) {
-        wrapper.classList.add("expanded");
-
-        // Dim other projects
-        document.querySelectorAll(".project").forEach((p) => {
-          if (p !== wrapper) p.classList.add("inactive");
-        });
-
-        // --- MEDIA ---
-        const mediaWrapper = document.createElement("div");
-        mediaWrapper.classList.add("project-media");
-
-        project.media.forEach((src) => {
-          let el;
-          if (src.match(/\.(mp4|webm)$/)) {
-            el = document.createElement("video");
-            el.src = src;
-            el.controls = false;
-            el.autoplay = true;
-            el.muted = true;
-          } else {
-            el = document.createElement("img");
-            el.src = src;
-            el.alt = project.title;
-          }
-          mediaWrapper.appendChild(el);
-        });
-
-        const slides = Array.from(mediaWrapper.children);
-        let currentIndex = 0;
-
-        function showSlide() {
-          slides.forEach((slide, i) => {
-            slide.style.display = i === currentIndex ? "block" : "none";
-          });
-        }
-        showSlide();
-
-        const zoomOverlay = document.getElementById("media-zoom-overlay");
-
-        // --- Mouse-based slide navigation ---
-        mediaWrapper.addEventListener("mousemove", (e) => {
-          const rect = mediaWrapper.getBoundingClientRect();
-          const mouseX = e.clientX - rect.left;
-          const thirdWidth = rect.width / 4;
-
-          // Remove both classes by default
-          mediaWrapper.classList.remove("cursor-left", "cursor-right");
-
-          if (mouseX < thirdWidth) {
-            // Left 1/3
-            mediaWrapper.classList.add("cursor-left");
-          } else if (mouseX > rect.width - thirdWidth) {
-            // Right 1/3
-            mediaWrapper.classList.add("cursor-right");
-          }
-          // Middle 1/3: no cursor class
-        });
-
-        mediaWrapper.addEventListener("click", (e) => {
-          const rect = mediaWrapper.getBoundingClientRect();
-          const mouseX = e.clientX - rect.left;
-          const thirdWidth = rect.width / 4;
-
-          if (mouseX < thirdWidth) {
-            // Left third → previous
-            currentIndex = (currentIndex - 1 + slides.length) % slides.length;
-            showSlide();
-          } else if (mouseX > rect.width - thirdWidth) {
-            // Right third → next
-            currentIndex = (currentIndex + 1) % slides.length;
-            showSlide();
-          } else {
-            // Middle section → zoom in
-            const original = slides[currentIndex];
-            const clone = original.cloneNode(true);
-
-            zoomOverlay.innerHTML = ""; // clear previous
-            zoomOverlay.appendChild(clone);
-
-            // Position clone where the original is
-            const origRect = original.getBoundingClientRect();
-            clone.style.top = `${origRect.top}px`;
-            clone.style.left = `${origRect.left}px`;
-            clone.style.width = `${origRect.width}px`;
-            clone.style.height = `${origRect.height}px`;
-
-            // Activate overlay immediately (background still transparent)
-            zoomOverlay.classList.add("active");
-
-            // Force reflow so transition triggers
-            clone.getBoundingClientRect();
-
-            // Target size (centered)
-            const viewportWidth = window.innerWidth;
-            const viewportHeight = window.innerHeight;
-            const maxWidth = viewportWidth * 0.95;
-            const maxHeight = viewportHeight * 0.95;
-            const ratio = origRect.width / origRect.height;
-            let finalWidth = maxWidth;
-            let finalHeight = finalWidth / ratio;
-            if (finalHeight > maxHeight) {
-              finalHeight = maxHeight;
-              finalWidth = finalHeight * ratio;
-            }
-
-            clone.style.top = `${(viewportHeight - finalHeight) / 2}px`;
-            clone.style.left = `${(viewportWidth - finalWidth) / 2}px`;
-            clone.style.width = `${finalWidth}px`;
-            clone.style.height = `${finalHeight}px`;
-          }
-        });
-
-        zoomOverlay.addEventListener("click", () => {
-          const img = zoomOverlay.querySelector("img, video");
-          if (!img) return;
-
-          const orig = slides[currentIndex];
-          const origRect = orig.getBoundingClientRect();
-
-          // Animate back to original
-          img.style.top = `${origRect.top}px`;
-          img.style.left = `${origRect.left}px`;
-          img.style.width = `${origRect.width}px`;
-          img.style.height = `${origRect.height}px`;
-
-          // Fade background to transparent
-          zoomOverlay.classList.remove("active");
-
-          // Clean up after transition
-          img.addEventListener(
-            "transitionend",
-            () => {
-              zoomOverlay.innerHTML = "";
-              zoomOverlay.classList.remove("active"); // ensure reset
-              zoomOverlay.removeAttribute("style"); // clear pointer-events override
-            },
-            { once: true }
-          );
-        });
-
-        // Append media to expanded container
-        expandedMediaContainer.appendChild(mediaWrapper);
-
-        // --- TEXT ---
-        const textWrapper = document.createElement("div");
-        textWrapper.classList.add("project-text");
-        const description = document.createElement("p");
-        description.textContent = project.description;
-        description.classList.add("project-description");
-        textWrapper.appendChild(description);
-        expandedTextContainer.appendChild(textWrapper);
-
-        // Optional: smooth-scroll to project
-        const rect = wrapper.getBoundingClientRect();
-        const elementTop = rect.top + window.pageYOffset;
-        const elementHeight = rect.height;
-        const offset = (window.innerHeight - elementHeight) / 2;
-        const scrollTo = elementTop - offset;
-        window.scrollTo({ top: scrollTo, behavior: "smooth" });
+      const firstMedia = project.media[0];
+      let el;
+      if (firstMedia.match(/\.(mp4|webm)$/)) {
+        el = document.createElement("video");
+        el.src = firstMedia;
+        el.autoplay = true;
+        el.muted = true;
+        el.loop = true;
+      } else {
+        el = document.createElement("img");
+        el.src = firstMedia;
+        el.alt = project.title;
       }
+
+      expandedMediaContainer.innerHTML = "";
+      expandedMediaContainer.appendChild(el);
+      expandedMediaContainer.style.display = "block";
     });
 
-    wrapper.appendChild(title);
+    wrapper.addEventListener("mouseleave", () => {
+      expandedMediaContainer.style.display = "none";
+      expandedMediaContainer.innerHTML = "";
+    });
+
     container.appendChild(wrapper);
+
+    // Add click behavior
+    wrapper.addEventListener("click", () => {
+      if (!project.media || !project.media.length) return;
+
+      // Clear old overlay content (except close button)
+      zoomOverlay.querySelectorAll(".project-media").forEach((m) => m.remove());
+
+      // --- MEDIA WRAPPER (slideshow container) ---
+      const mediaWrapper = document.createElement("div");
+      mediaWrapper.classList.add("project-media");
+      zoomOverlay.appendChild(mediaWrapper);
+
+      // ✅ Correct placement – update overlay text on open
+      const overlayText = document.getElementById("overlay-text");
+      overlayText.querySelector(".overlay-title").textContent = project.title;
+      overlayText.querySelector(".overlay-year").textContent = project.year;
+      overlayText.querySelector(".overlay-type").textContent = project.type;
+      overlayText.querySelector(".overlay-description").textContent =
+        project.description || "";
+
+      // Add all media as slides
+      project.media.forEach((src) => {
+        let el;
+        if (src.match(/\.(mp4|webm)$/)) {
+          el = document.createElement("video");
+          el.src = src;
+          el.controls = false;
+          el.autoplay = true;
+          el.muted = true;
+          el.loop = true;
+        } else {
+          el = document.createElement("img");
+          el.src = src;
+          el.alt = project.title;
+        }
+        mediaWrapper.appendChild(el);
+      });
+
+      const slides = Array.from(mediaWrapper.children);
+      let currentIndex = 0;
+
+      function showSlide() {
+        slides.forEach((slide, i) => {
+          slide.style.display = i === currentIndex ? "block" : "none";
+          slide.style.position = "absolute"; // stack slides
+          slide.style.top = "0";
+          slide.style.left = "0";
+          slide.style.width = "100%";
+          slide.style.height = "100%";
+          slide.style.objectFit = "contain";
+        });
+      }
+      showSlide();
+
+      // --- Cursor + navigation across full screen ---
+      // --- Cursor + navigation across full screen ---
+      function updateCursor(e) {
+        if (!zoomOverlay.classList.contains("active") || slides.length <= 1) {
+          document.body.classList.remove("cursor-left", "cursor-right");
+          return;
+        }
+        const marginTop = 60; // px safe zone at the top (for close button etc.)
+        const marginSides = 60; // px safe zone left + right
+
+        const withinY = e.clientY > marginTop;
+        const withinX =
+          e.clientX > marginSides &&
+          e.clientX < window.innerWidth - marginSides;
+        if (!withinY || !withinX) {
+          document.body.classList.remove("cursor-left", "cursor-right");
+          return;
+        }
+        const halfWidth = window.innerWidth / 2;
+        document.body.classList.remove("cursor-left", "cursor-right");
+
+        if (e.clientX < halfWidth) {
+          document.body.classList.add("cursor-left");
+        } else {
+          document.body.classList.add("cursor-right");
+        }
+      }
+
+      function handleClick(e) {
+        if (!zoomOverlay.classList.contains("active") || slides.length <= 1)
+          return;
+
+        const marginTop = 60; // px safe zone at the top (for close button etc.)
+        const marginSides = 60; // px safe zone left + right
+
+        const withinY = e.clientY > marginTop;
+        const withinX =
+          e.clientX > marginSides &&
+          e.clientX < window.innerWidth - marginSides;
+        if (!withinY || !withinX) return;
+
+        // prevent clicks on close button from triggering slide nav
+        if (e.target.closest("#overlay-close")) return;
+
+        const halfWidth = window.innerWidth / 2;
+        if (e.clientX < halfWidth) {
+          currentIndex = (currentIndex - 1 + slides.length) % slides.length;
+        } else {
+          currentIndex = (currentIndex + 1) % slides.length;
+        }
+        showSlide();
+      }
+
+      // Attach AFTER overlay is active
+      document.addEventListener("mousemove", updateCursor);
+
+      setTimeout(() => {
+        document.addEventListener("click", handleClick);
+      }, 0); // this ensures the first click (open) is ignored
+
+      // document.addEventListener("click", handleClick);
+
+      // --- Keyboard navigation ---
+      function handleKey(e) {
+        if (!zoomOverlay.classList.contains("active")) return;
+        if (e.key === "ArrowLeft") {
+          currentIndex = (currentIndex - 1 + slides.length) % slides.length;
+          showSlide();
+        }
+        if (e.key === "ArrowRight") {
+          currentIndex = (currentIndex + 1) % slides.length;
+          showSlide();
+        }
+        if (e.key === "Escape") {
+          closeZoomOverlay();
+        }
+      }
+      document.addEventListener("keydown", handleKey);
+
+      // --- Animate from preview to overlay ---
+      const preview = expandedMediaContainer.querySelector("img, video");
+      const firstSlide = slides[currentIndex];
+      const origRect = preview
+        ? preview.getBoundingClientRect()
+        : firstSlide.getBoundingClientRect();
+
+      mediaWrapper.style.position = "absolute";
+      mediaWrapper.style.top = `${origRect.top}px`;
+      mediaWrapper.style.left = `${origRect.left}px`;
+      mediaWrapper.style.width = `${origRect.width}px`;
+      mediaWrapper.style.height = `${origRect.height}px`;
+
+      zoomOverlay.classList.add("active");
+      mediaWrapper.getBoundingClientRect(); // force reflow
+
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      const maxWidth = viewportWidth * 0.75;
+      const maxHeight = viewportHeight * 0.75;
+      const ratio = origRect.width / origRect.height;
+      let finalWidth = maxWidth;
+      let finalHeight = finalWidth / ratio;
+      if (finalHeight > maxHeight) {
+        finalHeight = maxHeight;
+        finalWidth = finalHeight * ratio;
+      }
+
+      mediaWrapper.style.top = `${(viewportHeight - finalHeight) / 2}px`;
+      mediaWrapper.style.left = `${(viewportWidth - finalWidth) / 2}px`;
+      mediaWrapper.style.width = `${finalWidth}px`;
+      mediaWrapper.style.height = `${finalHeight}px`;
+
+      const overlayClose = document.getElementById("overlay-close");
+      overlayClose.addEventListener("click", closeZoomOverlay);
+
+      // --- Close overlay ---
+      function closeZoomOverlay() {
+        const mediaWrapper = zoomOverlay.querySelector(".project-media");
+        if (!mediaWrapper) return;
+
+        overlayText.querySelector(".overlay-title").textContent = "";
+        overlayText.querySelector(".overlay-year").textContent = "";
+        overlayText.querySelector(".overlay-type").textContent = "";
+        overlayText.querySelector(".overlay-description").textContent = "";
+
+        const preview = expandedMediaContainer.querySelector("img, video");
+
+        if (!preview) {
+          zoomOverlay.classList.remove("active");
+          mediaWrapper.remove();
+          document.body.classList.remove("cursor-left", "cursor-right");
+          document.removeEventListener("mousemove", updateCursor);
+          document.removeEventListener("click", handleClick);
+          document.removeEventListener("keydown", handleKey);
+          return;
+        }
+
+        const origRect = preview.getBoundingClientRect();
+        mediaWrapper.style.top = `${origRect.top}px`;
+        mediaWrapper.style.left = `${origRect.left}px`;
+        mediaWrapper.style.width = `${origRect.width}px`;
+        mediaWrapper.style.height = `${origRect.height}px`;
+
+        zoomOverlay.classList.remove("active");
+
+        mediaWrapper.addEventListener(
+          "transitionend",
+          () => {
+            mediaWrapper.remove();
+            document.body.classList.remove("cursor-left", "cursor-right");
+            document.removeEventListener("mousemove", updateCursor);
+            document.removeEventListener("click", handleClick);
+            document.removeEventListener("keydown", handleKey);
+          },
+          { once: true }
+        );
+      }
+    });
   });
 }
