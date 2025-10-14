@@ -229,6 +229,8 @@ function openProjectOverlay(project, expandedMediaContainer, zoomOverlay) {
       slide.style.width = "100%";
       slide.style.height = "100%";
       slide.style.objectFit = "contain";
+      slide.style.opacity = i === overlayState.currentIndex ? "1" : "0";
+      slide.style.transition = "opacity 0.4s ease";
     });
 
     slideCounter.textContent = `${overlayState.currentIndex + 1} / ${
@@ -256,7 +258,6 @@ function openProjectOverlay(project, expandedMediaContainer, zoomOverlay) {
   const vw = window.innerWidth;
   const vh = window.innerHeight;
   const marginX = vw * 0.21;
-  const marginY = vh * 0.1;
   const availableW = vw - marginX * 2;
   const availableH = vh * 0.8;
   const ratio = origRect.width / origRect.height;
@@ -277,6 +278,34 @@ function openProjectOverlay(project, expandedMediaContainer, zoomOverlay) {
     mediaWrapper.style.width = `${finalW}px`;
     mediaWrapper.style.height = `${finalH}px`;
   });
+  // --- Make media responsive on window resize ---
+  function handleResize() {
+    if (!zoomOverlay.classList.contains("active")) return;
+
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const marginX = vw * 0.21;
+    const availableW = vw - marginX * 2;
+    const availableH = vh * 0.8;
+    const ratio = origRect.width / origRect.height;
+
+    let newW = availableW;
+    let newH = newW / ratio;
+    if (newH > availableH) {
+      newH = availableH;
+      newW = newH * ratio;
+    }
+
+    const newTop = vh / 2 - newH / 2;
+    const newLeft = vw / 2 - newW / 2;
+
+    mediaWrapper.style.top = `${newTop}px`;
+    mediaWrapper.style.left = `${newLeft}px`;
+    mediaWrapper.style.width = `${newW}px`;
+    mediaWrapper.style.height = `${newH}px`;
+  }
+
+  window.addEventListener("resize", handleResize);
 
   // --- Fade in overlay text, close, and counter after slide zoom finishes ---
   mediaWrapper.addEventListener(
@@ -286,8 +315,7 @@ function openProjectOverlay(project, expandedMediaContainer, zoomOverlay) {
       overlayClose.style.transition = "opacity 0.3s ease";
       slideCounter.style.transition = "opacity 0.3s ease";
 
-      // Slight reflow to ensure transition starts cleanly
-      overlayText.getBoundingClientRect();
+      overlayText.getBoundingClientRect(); // force reflow
 
       requestAnimationFrame(() => {
         overlayText.style.opacity = 1;
@@ -371,27 +399,24 @@ function openProjectOverlay(project, expandedMediaContainer, zoomOverlay) {
   setTimeout(() => document.addEventListener("click", handleClick), 0);
   document.addEventListener("keydown", handleKey);
 
-  // --- Close overlay (same fade-out pattern) ---
+  // --- Close overlay (fade-out only, no scale) ---
   overlayState.close = function (instant = false) {
     if (overlayState.closing) return;
     overlayState.closing = true;
 
-    // fade out text elements
+    // fade out everything
+    overlayText.style.transition = "opacity 0.3s ease";
+    overlayClose.style.transition = "opacity 0.3s ease";
+    slideCounter.style.transition = "opacity 0.3s ease";
+    mediaWrapper.style.transition = "opacity 0.3s ease";
+
     overlayText.style.opacity = 0;
     slideCounter.style.opacity = 0;
     overlayClose.style.opacity = 0;
-
-    const preview = expandedMediaContainer.querySelector("img, video");
-    const rect = preview ? preview.getBoundingClientRect() : origRect;
-
-    mediaWrapper.style.top = `${rect.top}px`;
-    mediaWrapper.style.left = `${rect.left}px`;
-    mediaWrapper.style.width = `${rect.width}px`;
-    mediaWrapper.style.height = `${rect.height}px`;
-
-    zoomOverlay.classList.remove("active");
+    mediaWrapper.style.opacity = 0;
 
     const cleanup = () => {
+      zoomOverlay.classList.remove("active");
       document.body.classList.remove("cursor-left", "cursor-right");
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("click", handleClick);
@@ -399,6 +424,7 @@ function openProjectOverlay(project, expandedMediaContainer, zoomOverlay) {
       mediaWrapper.remove();
       activeOverlay = null;
       cursorAnimationFrame = null;
+      window.removeEventListener("resize", handleResize);
     };
 
     if (instant) {
@@ -406,7 +432,7 @@ function openProjectOverlay(project, expandedMediaContainer, zoomOverlay) {
       return;
     }
 
-    mediaWrapper.addEventListener("transitionend", cleanup, { once: true });
+    setTimeout(cleanup, 300); // match fade duration
   };
 
   overlayClose.addEventListener("click", () => overlayState.close());
