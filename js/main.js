@@ -32,24 +32,21 @@ function renderProjects(projects) {
       if (!project.media || !project.media.length) return;
 
       const firstMedia = project.media[0];
-      let el;
+      let el = document.createElement("img");
+
       if (firstMedia.match(/\.(mp4|webm)$/)) {
-        el = document.createElement("video");
-        el.src = firstMedia;
-        el.autoplay = true;
-        el.muted = true;
-        el.loop = true;
+        // Use thumbnail instead of video
+        const thumbSrc = firstMedia.replace(/\.(mp4|webm)$/, "-thumb.jpg");
+        el.src = thumbSrc;
       } else {
-        el = document.createElement("img");
-        el.src = firstMedia;
-        el.alt = project.title;
+        el.src = firstMedia; // normal image
       }
 
+      el.alt = project.title;
       expandedMediaContainer.innerHTML = "";
       expandedMediaContainer.appendChild(el);
       expandedMediaContainer.style.display = "block";
     });
-
     wrapper.addEventListener("mouseleave", () => {
       expandedMediaContainer.style.display = "none";
       expandedMediaContainer.innerHTML = "";

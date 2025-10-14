@@ -11,7 +11,7 @@
     "type": "Web Design",
     "year": "2025",
     "description": "Website promoting the UN’s 2030 Sustainable Development Goals for younger audiences. Visitors explore an animated city to learn about each goal, with content focused on the Swiss context.",
-    "media": ["images/rendez1.mp4", "images/rendez2.png", "images/rendez3.png"]
+    "media": [ "images/rendez2.png","images/rendez1.mp4", "images/rendez3.png"]
   },
   {
     "title": "Hello World",
@@ -60,7 +60,7 @@
     "type": "3D",
     "year": "2023",
     "description": "A short film imagining a barren landscape reclaimed by greenery, where remnants of human activity meet the slow persistence of nature.",
-    "media": ["images/past-future1.mp4", "images/past-future2.png", "images/past-future3.png"]
+    "media": [ "images/past-future3.png", "images/past-future1.mp4", "images/past-future2.png"]
   }
 
 ]
