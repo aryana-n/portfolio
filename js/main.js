@@ -1,9 +1,24 @@
+let projects = []; // global scope
+
 document.addEventListener("DOMContentLoaded", () => {
   fetch("projects.json")
     .then((response) => response.json())
-    .then((projects) => {
+    .then((data) => {
+      projects = data; // save to global
       renderProjects(projects);
       preloadThumbnails(projects);
+
+      // Check URL for direct project link
+      const pathSlug = window.location.pathname.slice(1);
+      if (pathSlug) {
+        const project = projects.find((p) => p.slug === pathSlug);
+        if (project) {
+          const expandedMediaContainer =
+            document.getElementById("expanded-media");
+          const zoomOverlay = document.getElementById("media-zoom-overlay");
+          openProjectOverlay(project, expandedMediaContainer, zoomOverlay);
+        }
+      }
     })
     .catch((err) => console.error("Failed to load projects:", err));
 
@@ -30,16 +45,7 @@ function setupInfoOverlay() {
 
   if (!infoButton || !infoOverlay) return;
 
-  infoButton.addEventListener("click", openInfoOverlay);
-  infoOverlayClose.addEventListener("click", closeInfoOverlay);
-
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && infoOverlay.classList.contains("active")) {
-      closeInfoOverlay();
-    }
-  });
-
-  function openInfoOverlay() {
+  function openInfoOverlay(pushHistory = true) {
     infoOverlay.classList.add("active");
 
     // reset visibility
@@ -53,13 +59,37 @@ function setupInfoOverlay() {
       infoOverlayClose.style.transition = "opacity 0.3s ease";
       infoOverlayClose.style.opacity = 1;
     });
+    if (pushHistory) {
+      history.pushState({ info: true }, "", "/info");
+    }
   }
 
-  function closeInfoOverlay() {
+  function closeInfoOverlay(pushHistory = true) {
     infoOverlayText.style.opacity = 0;
     infoOverlayClose.style.opacity = 0;
     infoOverlay.classList.remove("active");
+    if (pushHistory) {
+      history.pushState({}, "", "/");
+    }
   }
+
+  infoButton.addEventListener("click", () => openInfoOverlay(true));
+  infoOverlayClose.addEventListener("click", () => closeInfoOverlay(true));
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && infoOverlay.classList.contains("active")) {
+      closeInfoOverlay();
+    }
+  });
+  window.addEventListener("popstate", (e) => {
+    if (!e.state || !e.state.overlay) {
+      // Close info overlay if open
+      if (infoOverlay.classList.contains("active")) {
+        closeInfoOverlay(false);
+      }
+    } else if (e.state.overlay === "info") {
+      openInfoOverlay(false);
+    }
+  });
 }
 
 function preloadThumbnails(projects) {
@@ -154,7 +184,12 @@ function renderProjects(projects) {
 
 let activeOverlay = null; // single overlay state
 
-function openProjectOverlay(project, expandedMediaContainer, zoomOverlay) {
+function openProjectOverlay(
+  project,
+  expandedMediaContainer,
+  zoomOverlay,
+  previewElement = null
+) {
   if (!project.media || !project.media.length) return;
 
   // Close existing overlay if open
@@ -238,13 +273,22 @@ function openProjectOverlay(project, expandedMediaContainer, zoomOverlay) {
     }`;
   }
 
+  // Update URL
+  history.pushState({ project: project.slug }, "", `/${project.slug}`);
+
   // --- Animate in from preview ---
-  const preview = expandedMediaContainer.querySelector("img, video");
+  const preview =
+    previewElement || expandedMediaContainer.querySelector("img, video");
   const firstSlide = overlayState.slides[0];
+
   const origRect = preview
     ? preview.getBoundingClientRect()
-    : firstSlide.getBoundingClientRect();
-
+    : {
+        top: window.innerHeight / 2,
+        left: window.innerWidth / 2,
+        width: firstSlide.naturalWidth || 300,
+        height: firstSlide.naturalHeight || 200,
+      };
   mediaWrapper.style.position = "absolute";
   mediaWrapper.style.top = `${origRect.top}px`;
   mediaWrapper.style.left = `${origRect.left}px`;
@@ -403,6 +447,8 @@ function openProjectOverlay(project, expandedMediaContainer, zoomOverlay) {
   overlayState.close = function (instant = false) {
     if (overlayState.closing) return;
     overlayState.closing = true;
+    // Revert URL
+    history.pushState({}, "", "/");
 
     // fade out everything
     overlayText.style.transition = "opacity 0.3s ease";
@@ -437,3 +483,24 @@ function openProjectOverlay(project, expandedMediaContainer, zoomOverlay) {
 
   overlayClose.addEventListener("click", () => overlayState.close());
 }
+
+window.addEventListener("popstate", (e) => {
+  const expandedMediaContainer = document.getElementById("expanded-media");
+  const zoomOverlay = document.getElementById("media-zoom-overlay");
+
+  if (!e.state || !e.state.project) {
+    if (activeOverlay) activeOverlay.close(true);
+  } else {
+    const projectSlug = e.state.project;
+    const project = projects.find((p) => p.slug === projectSlug);
+    if (!project) return;
+
+    // Always rebuild the overlay, with a fallback preview for animation
+    const preview = document.querySelector(
+      `.project[data-index="${projects.indexOf(
+        project
+      )}"] img, .project[data-index="${projects.indexOf(project)}"] video`
+    );
+    openProjectOverlay(project, expandedMediaContainer, zoomOverlay, preview);
+  }
+});
