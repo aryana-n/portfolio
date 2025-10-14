@@ -3,10 +3,64 @@ document.addEventListener("DOMContentLoaded", () => {
     .then((response) => response.json())
     .then((projects) => {
       renderProjects(projects);
-      preloadThumbnails(projects); // <-- call preloader here
+      preloadThumbnails(projects);
     })
     .catch((err) => console.error("Failed to load projects:", err));
+
+  setupInfoOverlay(); // initialize the header overlay
+
+  // Optional: Click on name to reset (reload)
+  // const myName = document.getElementById("my-name");
+  // if (myName) {
+  //   myName.style.cursor = "pointer"; // make it clear it’s clickable
+  //   myName.addEventListener("click", () => {
+  //     window.location.reload(); // simple way to reset everything
+  //   });
+  // }
 });
+
+/* ==========================================================================
+   INFO OVERLAY (modular, like project overlay)
+   ========================================================================== */
+function setupInfoOverlay() {
+  const infoButton = document.querySelector(".info");
+  const infoOverlay = document.getElementById("info-overlay");
+  const infoOverlayText = document.getElementById("info-overlay-text");
+  const infoOverlayClose = document.getElementById("info-overlay-close");
+
+  if (!infoButton || !infoOverlay) return;
+
+  infoButton.addEventListener("click", openInfoOverlay);
+  infoOverlayClose.addEventListener("click", closeInfoOverlay);
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && infoOverlay.classList.contains("active")) {
+      closeInfoOverlay();
+    }
+  });
+
+  function openInfoOverlay() {
+    infoOverlay.classList.add("active");
+
+    // reset visibility
+    infoOverlayText.style.opacity = 0;
+    infoOverlayClose.style.opacity = 0;
+
+    infoOverlay.getBoundingClientRect(); // force reflow
+    requestAnimationFrame(() => {
+      infoOverlayText.style.transition = "opacity 0.3s ease";
+      infoOverlayText.style.opacity = 1;
+      infoOverlayClose.style.transition = "opacity 0.3s ease";
+      infoOverlayClose.style.opacity = 1;
+    });
+  }
+
+  function closeInfoOverlay() {
+    infoOverlayText.style.opacity = 0;
+    infoOverlayClose.style.opacity = 0;
+    infoOverlay.classList.remove("active");
+  }
+}
 
 function preloadThumbnails(projects) {
   projects.forEach((project) => {
@@ -95,52 +149,80 @@ function renderProjects(projects) {
 }
 
 /* ==========================================================================
-   Overlay + Slideshow Logic (modularized)
+   Optimized Overlay + Slideshow Logic (full feature parity)
    ========================================================================== */
+
+let activeOverlay = null; // single overlay state
 
 function openProjectOverlay(project, expandedMediaContainer, zoomOverlay) {
   if (!project.media || !project.media.length) return;
 
-  // Clear old overlay content
+  // Close existing overlay if open
+  if (activeOverlay && typeof activeOverlay.close === "function") {
+    activeOverlay.close(true);
+  }
+
+  const overlayState = {
+    project,
+    expandedMediaContainer,
+    zoomOverlay,
+    currentIndex: 0,
+    slides: [],
+    closing: false,
+  };
+  activeOverlay = overlayState;
+
+  // --- Clear old media ---
   zoomOverlay.querySelectorAll(".project-media").forEach((m) => m.remove());
 
-  // --- MEDIA WRAPPER (slideshow container) ---
+  // --- Create wrapper ---
   const mediaWrapper = document.createElement("div");
   mediaWrapper.classList.add("project-media");
   zoomOverlay.appendChild(mediaWrapper);
 
-  // --- Overlay text ---
+  // --- Build slides ---
+  project.media.forEach((src) => {
+    let el;
+    if (src.match(/\.(mp4|webm)$/)) {
+      el = document.createElement("video");
+      el.src = src;
+      el.autoplay = true;
+      el.loop = true;
+      el.muted = true;
+    } else {
+      el = document.createElement("img");
+      el.src = src;
+      el.alt = project.title;
+    }
+    el.style.display = "none";
+    mediaWrapper.appendChild(el);
+    overlayState.slides.push(el);
+  });
+
+  // --- UI elements ---
   const overlayText = document.getElementById("overlay-text");
+  const slideCounter = document.getElementById("slide-counter");
+  const overlayClose = document.getElementById("overlay-close");
+
   overlayText.querySelector(".overlay-title").textContent = project.title;
   overlayText.querySelector(".overlay-year").textContent = project.year;
   overlayText.querySelector(".overlay-type").textContent = project.type;
   overlayText.querySelector(".overlay-description").textContent =
     project.description || "";
 
-  // --- Media slides ---
-  project.media.forEach((src) => {
-    let el;
-    if (src.match(/\.(mp4|webm)$/)) {
-      el = document.createElement("video");
-      el.src = src;
-      el.controls = false;
-      el.autoplay = true;
-      el.muted = true;
-      el.loop = true;
-    } else {
-      el = document.createElement("img");
-      el.src = src;
-      el.alt = project.title;
-    }
-    mediaWrapper.appendChild(el);
-  });
+  // Reset opacity (for fade-in)
+  overlayText.style.opacity = 0;
+  overlayClose.style.opacity = 0;
+  slideCounter.style.opacity = 0;
+  slideCounter.textContent = "";
 
-  const slides = Array.from(mediaWrapper.children);
-  let currentIndex = 0;
+  // --- Show slide ---
+  function showSlide(index = overlayState.currentIndex) {
+    overlayState.currentIndex =
+      (index + overlayState.slides.length) % overlayState.slides.length;
 
-  function showSlide() {
-    slides.forEach((slide, i) => {
-      slide.style.display = i === currentIndex ? "block" : "none";
+    overlayState.slides.forEach((slide, i) => {
+      slide.style.display = i === overlayState.currentIndex ? "block" : "none";
       slide.style.position = "absolute";
       slide.style.top = "0";
       slide.style.left = "0";
@@ -148,90 +230,15 @@ function openProjectOverlay(project, expandedMediaContainer, zoomOverlay) {
       slide.style.height = "100%";
       slide.style.objectFit = "contain";
     });
-  }
-  showSlide();
 
-  // --- Cursor + Navigation ---
-  function updateCursor(e) {
-    if (!zoomOverlay.classList.contains("active") || slides.length <= 1) {
-      document.body.classList.remove("cursor-left", "cursor-right");
-      return;
-    }
-
-    const marginTop = 80;
-    const marginSides = 60;
-    const withinY = e.clientY > marginTop;
-    const withinX =
-      e.clientX > marginSides && e.clientX < window.innerWidth - marginSides;
-
-    if (!withinY || !withinX) {
-      document.body.classList.remove("cursor-left", "cursor-right");
-      return;
-    }
-
-    const halfWidth = window.innerWidth / 2;
-    document.body.classList.remove("cursor-left", "cursor-right");
-
-    if (e.clientX < halfWidth) {
-      document.body.classList.add("cursor-left");
-    } else {
-      document.body.classList.add("cursor-right");
-    }
+    slideCounter.textContent = `${overlayState.currentIndex + 1} / ${
+      overlayState.slides.length
+    }`;
   }
 
-  // --- rAF-based cursor listener ---
-  let cursorAnimationFrame = null;
-  function handleMouseMove(e) {
-    if (!zoomOverlay.classList.contains("active")) return;
-
-    if (!cursorAnimationFrame) {
-      cursorAnimationFrame = requestAnimationFrame(() => {
-        updateCursor(e);
-        cursorAnimationFrame = null;
-      });
-    }
-  }
-
-  // --- Click navigation ---
-  function handleClick(e) {
-    if (!zoomOverlay.classList.contains("active") || slides.length <= 1) return;
-    if (e.target.closest("#overlay-close")) return;
-
-    const marginTop = 60;
-    const marginSides = 60;
-    const withinY = e.clientY > marginTop;
-    const withinX =
-      e.clientX > marginSides && e.clientX < window.innerWidth - marginSides;
-    if (!withinY || !withinX) return;
-
-    const halfWidth = window.innerWidth / 2;
-    if (e.clientX < halfWidth) {
-      currentIndex = (currentIndex - 1 + slides.length) % slides.length;
-    } else {
-      currentIndex = (currentIndex + 1) % slides.length;
-    }
-    showSlide();
-  }
-
-  // --- Keyboard navigation ---
-  function handleKey(e) {
-    if (!zoomOverlay.classList.contains("active")) return;
-    if (e.key === "ArrowLeft") {
-      currentIndex = (currentIndex - 1 + slides.length) % slides.length;
-      showSlide();
-    }
-    if (e.key === "ArrowRight") {
-      currentIndex = (currentIndex + 1) % slides.length;
-      showSlide();
-    }
-    if (e.key === "Escape") {
-      closeZoomOverlay();
-    }
-  }
-
-  // --- Animate from preview to overlay ---
+  // --- Animate in from preview ---
   const preview = expandedMediaContainer.querySelector("img, video");
-  const firstSlide = slides[currentIndex];
+  const firstSlide = overlayState.slides[0];
   const origRect = preview
     ? preview.getBoundingClientRect()
     : firstSlide.getBoundingClientRect();
@@ -242,79 +249,165 @@ function openProjectOverlay(project, expandedMediaContainer, zoomOverlay) {
   mediaWrapper.style.width = `${origRect.width}px`;
   mediaWrapper.style.height = `${origRect.height}px`;
 
+  // --- Activate overlay (same as info overlay pattern) ---
   zoomOverlay.classList.add("active");
-  mediaWrapper.getBoundingClientRect(); // force reflow
+  zoomOverlay.getBoundingClientRect(); // force reflow for CSS transition timing
 
-  const viewportWidth = window.innerWidth;
-  const viewportHeight = window.innerHeight;
-  const maxWidth = viewportWidth * 0.75;
-  const maxHeight = viewportHeight * 0.75;
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  const marginX = vw * 0.21;
+  const marginY = vh * 0.1;
+  const availableW = vw - marginX * 2;
+  const availableH = vh * 0.8;
   const ratio = origRect.width / origRect.height;
-  let finalWidth = maxWidth;
-  let finalHeight = finalWidth / ratio;
-  if (finalHeight > maxHeight) {
-    finalHeight = maxHeight;
-    finalWidth = finalHeight * ratio;
+
+  let finalW = availableW;
+  let finalH = finalW / ratio;
+  if (finalH > availableH) {
+    finalH = availableH;
+    finalW = finalH * ratio;
   }
 
-  mediaWrapper.style.top = `${(viewportHeight - finalHeight) / 2}px`;
-  mediaWrapper.style.left = `${(viewportWidth - finalWidth) / 2}px`;
-  mediaWrapper.style.width = `${finalWidth}px`;
-  mediaWrapper.style.height = `${finalHeight}px`;
+  const targetTop = vh / 2 - finalH / 2;
+  const targetLeft = vw / 2 - finalW / 2;
 
-  const overlayClose = document.getElementById("overlay-close");
-  overlayClose.addEventListener("click", closeZoomOverlay);
+  requestAnimationFrame(() => {
+    mediaWrapper.style.top = `${targetTop}px`;
+    mediaWrapper.style.left = `${targetLeft}px`;
+    mediaWrapper.style.width = `${finalW}px`;
+    mediaWrapper.style.height = `${finalH}px`;
+  });
+
+  // --- Fade in overlay text, close, and counter after slide zoom finishes ---
+  mediaWrapper.addEventListener(
+    "transitionend",
+    () => {
+      overlayText.style.transition = "opacity 0.3s ease";
+      overlayClose.style.transition = "opacity 0.3s ease";
+      slideCounter.style.transition = "opacity 0.3s ease";
+
+      // Slight reflow to ensure transition starts cleanly
+      overlayText.getBoundingClientRect();
+
+      requestAnimationFrame(() => {
+        overlayText.style.opacity = 1;
+        overlayClose.style.opacity = 1;
+        slideCounter.style.opacity = 1;
+      });
+
+      showSlide(0);
+    },
+    { once: true }
+  );
+
+  // --- Cursor update (unchanged) ---
+  let cursorAnimationFrame = null;
+  function updateCursor(e) {
+    if (
+      !zoomOverlay.classList.contains("active") ||
+      overlayState.slides.length <= 1
+    ) {
+      document.body.classList.remove("cursor-left", "cursor-right");
+      return;
+    }
+    const marginTop = 80;
+    const marginSides = 60;
+    const withinY = e.clientY > marginTop;
+    const withinX =
+      e.clientX > marginSides && e.clientX < window.innerWidth - marginSides;
+    if (!withinY || !withinX) {
+      document.body.classList.remove("cursor-left", "cursor-right");
+      return;
+    }
+    const halfWidth = window.innerWidth / 2;
+    document.body.classList.remove("cursor-left", "cursor-right");
+    if (e.clientX < halfWidth) document.body.classList.add("cursor-left");
+    else document.body.classList.add("cursor-right");
+  }
+
+  function handleMouseMove(e) {
+    if (!zoomOverlay.classList.contains("active")) return;
+    if (!cursorAnimationFrame) {
+      cursorAnimationFrame = requestAnimationFrame(() => {
+        updateCursor(e);
+        cursorAnimationFrame = null;
+      });
+    }
+  }
+
+  // --- Click navigation (unchanged) ---
+  function handleClick(e) {
+    if (
+      !zoomOverlay.classList.contains("active") ||
+      overlayState.slides.length <= 1
+    )
+      return;
+    if (e.target.closest("#overlay-close")) return;
+
+    const marginTop = 60;
+    const marginSides = 60;
+    const withinY = e.clientY > marginTop;
+    const withinX =
+      e.clientX > marginSides && e.clientX < window.innerWidth - marginSides;
+    if (!withinY || !withinX) return;
+
+    const halfWidth = window.innerWidth / 2;
+    const next = e.clientX >= halfWidth;
+    showSlide(
+      next ? overlayState.currentIndex + 1 : overlayState.currentIndex - 1
+    );
+  }
+
+  // --- Keyboard navigation (unchanged) ---
+  function handleKey(e) {
+    if (!zoomOverlay.classList.contains("active")) return;
+    if (e.key === "ArrowLeft") showSlide(overlayState.currentIndex - 1);
+    if (e.key === "ArrowRight") showSlide(overlayState.currentIndex + 1);
+    if (e.key === "Escape") overlayState.close();
+  }
 
   // --- Attach listeners ---
   document.addEventListener("mousemove", handleMouseMove);
   setTimeout(() => document.addEventListener("click", handleClick), 0);
   document.addEventListener("keydown", handleKey);
 
-  // --- Close overlay ---
-  function closeZoomOverlay() {
-    const mediaWrapper = zoomOverlay.querySelector(".project-media");
-    if (!mediaWrapper) return;
+  // --- Close overlay (same fade-out pattern) ---
+  overlayState.close = function (instant = false) {
+    if (overlayState.closing) return;
+    overlayState.closing = true;
 
-    overlayText.querySelector(".overlay-title").textContent = "";
-    overlayText.querySelector(".overlay-year").textContent = "";
-    overlayText.querySelector(".overlay-type").textContent = "";
-    overlayText.querySelector(".overlay-description").textContent = "";
+    // fade out text elements
+    overlayText.style.opacity = 0;
+    slideCounter.style.opacity = 0;
+    overlayClose.style.opacity = 0;
 
     const preview = expandedMediaContainer.querySelector("img, video");
-    if (!preview) {
-      zoomOverlay.classList.remove("active");
+    const rect = preview ? preview.getBoundingClientRect() : origRect;
+
+    mediaWrapper.style.top = `${rect.top}px`;
+    mediaWrapper.style.left = `${rect.left}px`;
+    mediaWrapper.style.width = `${rect.width}px`;
+    mediaWrapper.style.height = `${rect.height}px`;
+
+    zoomOverlay.classList.remove("active");
+
+    const cleanup = () => {
+      document.body.classList.remove("cursor-left", "cursor-right");
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("click", handleClick);
+      document.removeEventListener("keydown", handleKey);
       mediaWrapper.remove();
+      activeOverlay = null;
+      cursorAnimationFrame = null;
+    };
+
+    if (instant) {
       cleanup();
       return;
     }
 
-    const origRect = preview.getBoundingClientRect();
-    mediaWrapper.style.top = `${origRect.top}px`;
-    mediaWrapper.style.left = `${origRect.left}px`;
-    mediaWrapper.style.width = `${origRect.width}px`;
-    mediaWrapper.style.height = `${origRect.height}px`;
+    mediaWrapper.addEventListener("transitionend", cleanup, { once: true });
+  };
 
-    zoomOverlay.classList.remove("active");
-
-    mediaWrapper.addEventListener(
-      "transitionend",
-      () => {
-        mediaWrapper.remove();
-        cleanup();
-      },
-      { once: true }
-    );
-  }
-
-  // --- Cleanup function ---
-  function cleanup() {
-    document.body.classList.remove("cursor-left", "cursor-right");
-    document.removeEventListener("mousemove", handleMouseMove);
-    if (cursorAnimationFrame) {
-      cancelAnimationFrame(cursorAnimationFrame);
-      cursorAnimationFrame = null;
-    }
-    document.removeEventListener("click", handleClick);
-    document.removeEventListener("keydown", handleKey);
-  }
+  overlayClose.addEventListener("click", () => overlayState.close());
 }
