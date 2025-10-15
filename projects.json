@@ -1,5 +1,13 @@
 [
   {
+    "title": "Check Out / Check In",
+    "type": "Game Design, 3D",
+    "year": "2025",
+    "description": "A point-and-click game where players take on the role of a maid on her first day in a luxury hotel. Each room must be restored by following a sequence of tasks from memory, where order and repetition define the experience. Guided by the overbearing voice of a manager, this experience combines curiosity, frustration and a quiet sense of absurdity in a simple game loop.",
+    "media": ["images/checkout1.png", "images/checkout2.mp4"],
+    "slug": "check-out"
+  },
+  {
     "title": "Otherworldly Insects",
     "type": "3D Image",
     "year": "2025",
@@ -9,7 +17,7 @@
   },
   {
     "title": "Rendez-vous 2030",
-    "type": "Web Design",
+    "type": "Web Design, 3D",
     "year": "2025",
     "description": "Website promoting the UN’s 2030 Sustainable Development Goals for younger audiences. Visitors explore an animated city to learn about each goal, with content focused on the Swiss context.",
     "media": [ "images/rendez2.png","images/rendez1.mp4", "images/rendez3.png"],
@@ -17,10 +25,10 @@
   },
   {
     "title": "Hello World",
-    "type": "3D, Motion Design",
+    "type": "3D Animation",
     "year": "2024",
     "description": "Music clip for “Hello World” by Rouge Hotel, unfolding a story through puppet-like animated figures.",
-    "media": ["images/hello1.mp4"],
+    "media": ["images/hello1.mp4", "images/hello2.png", "images/hello3.png", "images/hello4.png"],
     "slug": "hello-world"
   },
   {
@@ -28,7 +36,7 @@
     "type": "AR Experience, 3D",
     "year": "2024",
     "description": "This experience spawns a blanket fort under any table. Participants crawl underneath to explore a space filled with toys and objects reminiscent of childhood.",
-    "media": ["images/Cozyfort.mp4"],
+    "media": ["images/Cozyfort.mp4", "images/cozy-fort2.png", "images/cozy-fort3.png"],
     "slug": "cozy-fort"
   },
   {
@@ -41,34 +49,26 @@
   },
    {
     "title": "Liminal Dreams",
-    "type": "3D, VR",
+    "type": "VR Experience, 3D Animation",
     "year": "2024",
     "description": "A journey through abandoned, once-familiar spaces, evoking nostalgia and the lingering presence of childhood memories.",
     "media": ["images/liminal1.png", "images/liminal2.png", "images/liminal3.png", "images/liminal4.png", "images/liminal5.png", "images/liminal6.png"], 
     "slug": "liminal-dreams"
   },
   {
-    "title": "The Surveillance Desk",
-    "type": "Web Design",
-    "year": "2025",
-    "description": "This platform generates short stories from surveillance clips using AI. Users can choose the genre and remix the narrative.",
-    "media": [ "images/surveillance2.mp4", "images/surveillance1.jpg"], 
-    "slug": "surveillance-desk"
-  },
-  {
     "title": "Fishtank",
-    "type": "3D",
+    "type": "3D Animation",
     "year": "2023",
-    "description": "Short, looping animation following Slimy Stu and his friends swimming through a playful, VR-sculpted environment.",
-    "media": ["images/fishtank.mp4"],
+    "description": "A short, looping animation following Slimy Stu and his friends swimming through a playful, VR-sculpted environment.",
+    "media": ["images/fishtank.mp4", "images/fishtank2.mp4"],
     "slug": "fishtank"
   },
   {
     "title": "Past / Future",
-    "type": "3D",
+    "type": "3D Animation",
     "year": "2023",
     "description": "A short film imagining a barren landscape reclaimed by greenery, where remnants of human activity meet the slow persistence of nature.",
-    "media": [ "images/past-future3.png", "images/past-future1.mp4", "images/past-future2.png"],
+    "media": [ "images/past-future1.mp4","images/past-future4.png",  "images/past-future3.png", "images/past-future2.png"],
     "slug": "past-future"
   }
 

@@ -278,6 +278,7 @@ body.cursor-right {
   /* transition: all 0.5s ease; */
   object-fit: contain;
   object-position: center;
+  user-select: none;
 
   z-index: 1001;
 }
@@ -364,6 +365,8 @@ body.cursor-right {
   pointer-events: none;
   z-index: 700;
   transition: background-color 0.3s ease;
+  /* make sure it scrolls */
+  overflow-y: auto;
 }
 
 #info-overlay.active {
