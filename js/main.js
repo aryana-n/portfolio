@@ -242,8 +242,9 @@ function openProjectOverlay(
   overlayText.querySelector(".overlay-title").textContent = project.title;
   overlayText.querySelector(".overlay-year").textContent = project.year;
   overlayText.querySelector(".overlay-type").textContent = project.type;
-  overlayText.querySelector(".overlay-description").textContent =
-    project.description || "";
+  overlayText.querySelector(".overlay-description").innerHTML = (
+    project.description || ""
+  ).replace(/\n/g, "<br>");
 
   // Reset opacity (for fade-in)
   overlayText.style.opacity = 0;

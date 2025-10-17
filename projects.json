@@ -4,8 +4,16 @@
     "type": "Game Design, 3D",
     "year": "2025",
     "description": "A point-and-click game where players take on the role of a maid on her first day in a luxury hotel. Each room must be restored by following a sequence of tasks from memory, where order and repetition define the experience. Guided by the overbearing voice of a manager, this experience combines curiosity, frustration and a quiet sense of absurdity in a simple game loop.",
-    "media": ["images/checkout1.png", "images/checkout2.mp4"],
+    "media": ["images/checkout1.png", "images/checkout2.mp4", "images/checkout4.png", "images/checkout3.png"],
     "slug": "check-out"
+  },
+  {
+    "title": "M-Pesa, El Paquete…",
+    "type": "Bachelor Thesis",
+    "year": "2025",
+    "description": "Creolization of digital technologies in the Global South and their potential impact on the West.\nFull thesis available upon request.",
+    "media": ["images/memoire1.png", "images/memoire2.png"],
+    "slug": "thesis"
   },
   {
     "title": "Otherworldly Insects",
@@ -20,7 +28,7 @@
     "type": "Web Design, 3D",
     "year": "2025",
     "description": "Website promoting the UN’s 2030 Sustainable Development Goals for younger audiences. Visitors explore an animated city to learn about each goal, with content focused on the Swiss context.",
-    "media": [ "images/rendez2.png","images/rendez1.mp4", "images/rendez3.png"],
+    "media": [ "images/rendez2.png","images/rendez4.mp4", "images/rendez3.png"],
     "slug": "rendez-vous-2030"
   },
   {
@@ -35,7 +43,7 @@
     "title": "Cozy Fort",
     "type": "AR Experience, 3D",
     "year": "2024",
-    "description": "This experience spawns a blanket fort under any table. Participants crawl underneath to explore a space filled with toys and objects reminiscent of childhood.",
+    "description": "This experience spawns a blanket fort under any table. Participants crawl underneath to explore a space filled with toys and objects reminiscent of childhood.\nIn collaboration with Elena Biasi.",
     "media": ["images/Cozyfort.mp4", "images/cozy-fort2.png", "images/cozy-fort3.png"],
     "slug": "cozy-fort"
   },
@@ -43,7 +51,7 @@
     "title": "Jupiter 7",
     "type": "Web Design",
     "year": "2024",
-    "description": "Created for the fictional cult “Children of Elara,” this project uses a four-scroll layout where elements snap together to reveal images, buttons, and text.",
+    "description": "Created for the fictional cult “Children of Elara,” this project uses a four-scroll layout where elements snap together to reveal images, buttons, and text. \nIn collaboration with Livia Schmid.",
     "media": ["images/jupiter1.png", "images/jupiter3.mp4", "images/jupiter2.png"],
     "slug": "jupiter-7"
   },
@@ -51,7 +59,7 @@
     "title": "Liminal Dreams",
     "type": "VR Experience, 3D Animation",
     "year": "2024",
-    "description": "A journey through abandoned, once-familiar spaces, evoking nostalgia and the lingering presence of childhood memories.",
+    "description": "A journey through abandoned, once-familiar spaces, evoking nostalgia and the lingering presence of childhood memories. \nIn collaboration with Emilie Maier",
     "media": ["images/liminal1.png", "images/liminal2.png", "images/liminal3.png", "images/liminal4.png", "images/liminal5.png", "images/liminal6.png"], 
     "slug": "liminal-dreams"
   },
@@ -70,6 +78,14 @@
     "description": "A short film imagining a barren landscape reclaimed by greenery, where remnants of human activity meet the slow persistence of nature.",
     "media": [ "images/past-future1.mp4","images/past-future4.png",  "images/past-future3.png", "images/past-future2.png"],
     "slug": "past-future"
+  },
+  {
+    "title": "Mindful Meatball",
+    "type": "Illustration",
+    "year": "2020",
+    "description": "Illustrations for the children’s book Mindful Meatball, featuring a cast of playful food characters.",
+    "media": [ "images/minfullmeatball2.png", "images/minfulmeatball.png"],
+    "slug": "mindful-meatball"
   }
 
 ]
