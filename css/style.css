@@ -414,3 +414,92 @@ body.cursor-right {
   color: var(--main-color);
   text-decoration: none;
 }
+.exhibitions dl {
+  display: grid;
+  grid-template-columns: max-content 1fr; /* years take minimal width, names fill rest */
+  column-gap: 0.8rem; /* space between year and festival */
+  margin-top: 0;
+}
+
+.exhibitions dd {
+  margin: 0; /* remove default indentation */
+}
+
+.education dl {
+  display: grid;
+  gap: 0.8rem 2rem;
+  margin-top: 0;
+}
+
+.education .edu-item {
+  display: grid;
+  grid-template-columns: max-content 1fr; /* year column + description column */
+  gap: 0.8rem;
+  align-items: start; /* align year with top of description */
+}
+
+.education dd {
+  margin: 0;
+}
+
+.exhibitions dt,
+.education dt {
+  width: 8ch; /* or whatever fits your longest year */
+  /* text-align: right; */
+  /* font-weight: bold; */
+}
+
+/* mobile view */
+/* Hidden by default */
+#mobile-blocker {
+  display: none;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* MOBILE MODE */
+@media (max-width: 768px) {
+  /* same explicit hide selectors as above */
+  #project-list,
+  #expanded-media,
+  #media-zoom-overlay {
+    display: none !important;
+  }
+  #mobile-blocker {
+    display: flex;
+    position: fixed;
+    top: 40vh;
+    left: 0;
+    width: 100%;
+    /* height: calc(100vh - 100px); */
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    z-index: 500;
+  }
+  .mobile-logo {
+    width: 60px; /* adjust size */
+    height: 60px; /* optional: keep square */
+    animation: spin 6s linear infinite;
+    transform-origin: 50% 50%;
+    /* margin-bottom: 1rem; */
+  }
+  header {
+    z-index: 1000;
+    position: relative;
+  }
+  #info-overlay {
+    z-index: 1100;
+  }
+  #info-overlay-text {
+    width: 90%;
+    left: 0.5rem;
+  }
+}

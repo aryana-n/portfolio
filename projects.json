@@ -1,20 +1,5 @@
 [
-  {
-    "title": "Check Out / Check In",
-    "type": "Game Design, 3D",
-    "year": "2025",
-    "description": "A point-and-click game where players take on the role of a maid on her first day in a luxury hotel. Each room must be restored by following a sequence of tasks from memory, where order and repetition define the experience. Guided by the overbearing voice of a manager, this experience combines curiosity, frustration and a quiet sense of absurdity in a simple game loop.",
-    "media": ["images/checkout1.png", "images/checkout2.mp4", "images/checkout4.png", "images/checkout3.png"],
-    "slug": "check-out"
-  },
-  {
-    "title": "M-Pesa, El Paquete…",
-    "type": "Bachelor Thesis",
-    "year": "2025",
-    "description": "Creolization of digital technologies in the Global South and their potential impact on the West.\nFull thesis available upon request.",
-    "media": ["images/memoire1.png", "images/memoire2.png"],
-    "slug": "thesis"
-  },
+
   {
     "title": "Otherworldly Insects",
     "type": "3D Image",
@@ -22,6 +7,22 @@
     "description": "A study imagining insect-like forms, sculpted in ZBrush and rendered in Cinema4D with a cyanotype-inspired look.",
     "media": ["images/insects3.png", "images/insects1.png", "images/insects2.png"],
     "slug": "otherworldly-insects"
+  },
+  {
+    "title": "M-Pesa, El Paquete…",
+    "type": "Bachelor Thesis",
+    "year": "2025",
+    "description": "Creolization of digital technologies in the Global South and their potential impact on the West.\n \n Full thesis available upon request.",
+    "media": ["images/memoire1.png", "images/memoire2.png"],
+    "slug": "thesis"
+  },
+  {
+    "title": "Check Out / Check In",
+    "type": "Game Design, 3D",
+    "year": "2025",
+    "description": "A point-and-click game where players take on the role of a maid on her first day in a luxury hotel. Each room must be restored by following a sequence of tasks from memory, where order and repetition define the experience. Guided by the overbearing voice of a manager, this experience combines curiosity, frustration and a quiet sense of absurdity in a simple game loop.",
+    "media": ["images/checkout1.png", "images/checkout2.mp4", "images/checkout4.png", "images/checkout3.png"],
+    "slug": "check-out"
   },
   {
     "title": "Rendez-vous 2030",
@@ -78,14 +79,7 @@
     "description": "A short film imagining a barren landscape reclaimed by greenery, where remnants of human activity meet the slow persistence of nature.",
     "media": [ "images/past-future1.mp4","images/past-future4.png",  "images/past-future3.png", "images/past-future2.png"],
     "slug": "past-future"
-  },
-  {
-    "title": "Mindful Meatball",
-    "type": "Illustration",
-    "year": "2020",
-    "description": "Illustrations for the children’s book Mindful Meatball, featuring a cast of playful food characters.",
-    "media": [ "images/minfullmeatball2.png", "images/minfulmeatball.png"],
-    "slug": "mindful-meatball"
   }
+  
 
 ]
