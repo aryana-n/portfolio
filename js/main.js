@@ -48,19 +48,20 @@ function setupInfoOverlay() {
   function openInfoOverlay(pushHistory = true) {
     infoOverlay.classList.add("active");
 
-    // reset visibility
     infoOverlayText.style.opacity = 0;
     infoOverlayClose.style.opacity = 0;
-
     infoOverlay.getBoundingClientRect(); // force reflow
+
     requestAnimationFrame(() => {
       infoOverlayText.style.transition = "opacity 0.3s ease";
       infoOverlayText.style.opacity = 1;
       infoOverlayClose.style.transition = "opacity 0.3s ease";
       infoOverlayClose.style.opacity = 1;
     });
+
     if (pushHistory) {
-      history.pushState({ info: true }, "", "/info");
+      // use same key as projects for consistency
+      history.pushState({ overlay: "info" }, "", "/info");
     }
   }
 
@@ -68,8 +69,9 @@ function setupInfoOverlay() {
     infoOverlayText.style.opacity = 0;
     infoOverlayClose.style.opacity = 0;
     infoOverlay.classList.remove("active");
+
     if (pushHistory) {
-      history.pushState({}, "", "/");
+      history.pushState({ overlay: null }, "", "/");
     }
   }
 
@@ -488,20 +490,27 @@ function openProjectOverlay(
 window.addEventListener("popstate", (e) => {
   const expandedMediaContainer = document.getElementById("expanded-media");
   const zoomOverlay = document.getElementById("media-zoom-overlay");
+  const infoOverlay = document.getElementById("info-overlay");
 
-  if (!e.state || !e.state.project) {
+  if (!e.state || (!e.state.project && !e.state.overlay)) {
+    // nothing specific: close all overlays
     if (activeOverlay) activeOverlay.close(true);
-  } else {
+    if (infoOverlay.classList.contains("active")) {
+      closeInfoOverlay(false);
+    }
+  } else if (e.state.project) {
+    // rebuild project overlay
     const projectSlug = e.state.project;
     const project = projects.find((p) => p.slug === projectSlug);
     if (!project) return;
-
-    // Always rebuild the overlay, with a fallback preview for animation
     const preview = document.querySelector(
       `.project[data-index="${projects.indexOf(
         project
       )}"] img, .project[data-index="${projects.indexOf(project)}"] video`
     );
     openProjectOverlay(project, expandedMediaContainer, zoomOverlay, preview);
+  } else if (e.state.overlay === "info") {
+    // open info overlay
+    openInfoOverlay(false);
   }
 });
