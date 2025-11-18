@@ -9,14 +9,13 @@ document.addEventListener("DOMContentLoaded", () => {
       preloadThumbnails(projects);
 
       // Check URL for direct project link
-      const pathSlug = window.location.pathname.slice(1);
+      const pathSlug = window.location.hash.slice(2); // remove "#/"
       if (pathSlug) {
         const project = projects.find((p) => p.slug === pathSlug);
         if (project) {
-          const expandedMediaContainer =
-            document.getElementById("expanded-media");
-          const zoomOverlay = document.getElementById("media-zoom-overlay");
           openProjectOverlay(project, expandedMediaContainer, zoomOverlay);
+        } else if (pathSlug === "info") {
+          openInfoOverlay(false);
         }
       }
     })
