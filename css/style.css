@@ -475,7 +475,7 @@ body.cursor-right {
   #mobile-blocker {
     display: flex;
     position: fixed;
-    top: 40vh;
+    top: 43vh;
     left: 0;
     width: 100%;
     /* height: calc(100vh - 100px); */
@@ -483,6 +483,7 @@ body.cursor-right {
     align-items: center;
     text-align: center;
     z-index: 500;
+    font-weight: 400;
   }
   .mobile-logo {
     width: 60px; /* adjust size */
@@ -501,5 +502,7 @@ body.cursor-right {
   #info-overlay-text {
     width: 90%;
     left: 0.5rem;
+    /* line-height: 1.2; */
+    font-weight: 400;
   }
 }
