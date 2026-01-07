@@ -1,0 +1,65 @@
+[
+  {
+    "title": "Beadmaille earrings n°2",
+    "dimensions": "2.5 x 9 cm",
+    "description": "Long beaded chain earrings. Design inspired by vintage cross-stitch patterns. \n Handwoven with glass beads and stainless steel hardware.",
+    "media": ["/images/objects/n2earrings1.jpg", "/images/objects/n2earrings2.jpg"],
+    "slug": "earrings-2"
+  },
+  {
+    "title": "Beadmaille earrings n°1",
+    "dimensions": "2 x 7 cm",
+    "description": "Pair of asymmetrical beaded earrings. Design inspired by vintage cross-stitch patterns. \n Handwoven with glass beads and stainless steel hardware.",
+    "media": ["/images/objects/n1earrings1.jpg", "/images/objects/n1earrings2.jpg"],
+    "slug": "earrings-1"
+  },{
+    "title": "Coin pouch n°2",
+    "dimensions": "5.5 x 6.5 cm",
+    "description": "Coin purse / airpod case with customizable text. Snap button closure and small mini strap. Design inspired by vintage cross-stitch patterns. \n Handwoven with glass beads and nylon thread.",
+    "media": [ "/images/objects/airpod1.jpg", "/images/objects/airpod2.jpg","/images/objects/airpod3.jpg"],
+    "slug": "coin-pouch-2"
+  },
+  {
+    "title": "Coin pouch n°1",
+    "dimensions": "4.5 x 4.5 cm",
+    "description": "Mini swan coin pouch with snap button closure. Design inspired from Julius Nelson's Artyping (1939). \n Handwoven with glass beads and nylon thread.",
+    "media": ["/images/objects/swan1.jpg", "/images/objects/swan2.jpg","/images/objects/swan3.jpeg"],
+    "slug": "coin-pouch-1"
+  },
+  {
+   "title": "Lace necklace",
+    "dimensions": "35 cm",
+    "description": "Delicate beaded lace necklace. \n Handwoven with glass beads and cotton thread.",
+    "media": ["/images/objects/lace1.jpg", "/images/objects/lace2.jpg"],
+    "slug": "lace-necklace"
+  },
+  
+  {
+  "title": "Card holder n°2",
+    "dimensions": "6.5 x 9.5 cm",
+    "description": "Fish card holder with snap button closure.\n Handwoven with glass beads and nylon thread.",
+    "media": [ "/images/objects/fish1.jpg", "/images/objects/fish2.jpg", "/images/objects/fish3.jpg"],
+    "slug": "card-holder-2"
+  }, {
+    "title": "Card holder n°1",
+    "dimensions": "7 x 10 cm",
+    "description": "Flower card holder with snap button closure.\n Handwoven with glass beads and nylon thread.",
+    "media": ["/images/objects/flower1.jpg", "/images/objects/flower2.jpg", "/images/objects/flower3.jpg"],
+    "slug": "card-holder-1"
+  },
+  {
+    "title": "Airpod case n°1",
+    "dimensions": "6 x 7 cm",
+    "description": "Cowboy airpod case with short strap and carabiner. Chart found on pinterest.\n Handwoven with glass beads and nylon thread.",
+    "media": ["/images/objects/cowboy1.jpg", "/images/objects/cowboy2.jpg"],
+    "slug": "airpod-case-1"
+  },
+  {
+  "title": "Chainmaille chains",
+    "dimensions": "Multiple sizes",
+    "description": "Set of simple chainmaille bracelets and keychains.\n Made with stainless steel rings.",
+    "media": [ "/images/objects/chain2.jpg", "/images/objects/chain1.jpg", "/images/objects/chain3.jpg", "/images/objects/chain4.jpg"],
+    "slug": "chains"
+  }
+  
+]

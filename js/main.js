@@ -1,4 +1,7 @@
-let projects = []; // global scope
+let currentMode = "projects";
+let projects = [];
+let objects = [];
+let isOverlayOpen = false;
 
 document.addEventListener("DOMContentLoaded", () => {
   fetch("projects.json")
@@ -8,30 +11,62 @@ document.addEventListener("DOMContentLoaded", () => {
       renderProjects(projects);
       preloadThumbnails(projects);
 
-      // Check URL for direct project link
       const pathSlug = window.location.pathname.slice(1);
       if (pathSlug) {
-        const project = projects.find((p) => p.slug === pathSlug);
-        if (project) {
-          const expandedMediaContainer =
-            document.getElementById("expanded-media");
-          const zoomOverlay = document.getElementById("media-zoom-overlay");
-          openProjectOverlay(project, expandedMediaContainer, zoomOverlay);
+        if (pathSlug === "objects") {
+          setMode("objects"); // switch to objects if /objects
+        } else {
+          const project = projects.find((p) => p.slug === pathSlug);
+          if (project) {
+            const expandedMediaContainer =
+              document.getElementById("expanded-media");
+            const zoomOverlay = document.getElementById("media-zoom-overlay");
+            openProjectOverlay(project, expandedMediaContainer, zoomOverlay);
+          }
         }
+      } else {
+        setMode("projects"); // default
       }
     })
     .catch((err) => console.error("Failed to load projects:", err));
 
+  document
+    .querySelectorAll(".nav-item")
+    .forEach((el) => el.classList.remove("active"));
+  document
+    .querySelector('.nav-item[data-mode="projects"]')
+    ?.classList.add("active");
+
+  setMode("projects");
   setupInfoOverlay(); // initialize the header overlay
+  setupProjectClickHandler();
+
+  //  change for div rather than buttons
+
+  document
+    .querySelector('.nav-item[data-mode="projects"]')
+    ?.addEventListener("click", () => {
+      if (currentMode === "projects") return;
+      setMode("projects");
+      history.pushState(null, "", "/");
+    });
+
+  document
+    .querySelector('.nav-item[data-mode="objects"]')
+    ?.addEventListener("click", () => {
+      if (currentMode === "objects") return;
+      setMode("objects");
+      history.pushState({ mode: "objects" }, "", "/objects");
+    });
 
   // Optional: Click on name to reset (reload)
-  // const myName = document.getElementById("my-name");
-  // if (myName) {
-  //   myName.style.cursor = "pointer"; // make it clear it’s clickable
-  //   myName.addEventListener("click", () => {
-  //     window.location.reload(); // simple way to reset everything
-  //   });
-  // }
+  const myName = document.getElementById("my-name");
+  if (myName) {
+    myName.style.cursor = "pointer"; // make it clear it’s clickable
+    myName.addEventListener("click", () => {
+      window.location.reload(); // simple way to reset everything
+    });
+  }
 });
 
 /* ==========================================================================
@@ -94,19 +129,156 @@ function setupInfoOverlay() {
   });
 }
 
-function preloadThumbnails(projects) {
-  projects.forEach((project) => {
-    if (!project.media || !project.media.length) return;
+function preloadThumbnails(items, callback) {
+  if (!items.length) {
+    if (callback) callback();
+    return;
+  }
 
-    const firstMedia = project.media[0];
+  let loadedCount = 0;
+  const total = items.length;
+
+  items.forEach((item) => {
+    if (!item.media || !item.media.length) {
+      loadedCount++;
+      if (loadedCount === total && callback) callback();
+      return;
+    }
+
+    const firstMedia = item.media[0];
+    let src = firstMedia;
+
     if (firstMedia.match(/\.(mp4|webm)$/)) {
-      // Replace video with thumbnail
-      const thumbSrc = firstMedia.replace(/\.(mp4|webm)$/, "-thumb.jpg");
-      const img = new Image();
-      img.src = thumbSrc; // browser downloads it in background
+      src = firstMedia.replace(/\.(mp4|webm)$/, "-thumb.jpg");
+    }
+
+    const img = new Image();
+    img.src = src;
+    img.onload = img.onerror = () => {
+      loadedCount++;
+      if (loadedCount === total && callback) callback();
+    };
+  });
+}
+
+function setMode(mode) {
+  if (mode !== "projects" && mode !== "objects") return;
+  if (currentMode === mode) return;
+
+  currentMode = mode;
+  document.body.dataset.mode = mode;
+
+  // nav active state
+  document
+    .querySelectorAll(".nav-item")
+    .forEach((el) => el.classList.remove("active"));
+  const activeNav = document.querySelector(`.nav-item[data-mode="${mode}"]`);
+  if (activeNav) activeNav.classList.add("active");
+
+  const container = document.getElementById("project-list");
+
+  // 1. Fade OUT
+  container.style.opacity = 0;
+
+  // 2. Swap content after fade out
+  setTimeout(() => {
+    container
+      .querySelectorAll(".project:not(.template)")
+      .forEach((el) => el.remove());
+
+    if (mode === "projects") {
+      // preload first images, then render
+      preloadThumbnails(projects, () => {
+        renderProjects(projects);
+        fadeInContainer(container);
+      });
     } else {
-      const img = new Image();
-      img.src = firstMedia; // normal image
+      if (!objects.length) {
+        fetch("objects.json")
+          .then((res) => res.json())
+          .then((data) => {
+            objects = data;
+            preloadThumbnails(objects, () => {
+              renderObjects(objects);
+              fadeInContainer(container);
+            });
+          });
+        return;
+      } else {
+        preloadThumbnails(objects, () => {
+          renderObjects(objects);
+          fadeInContainer(container);
+        });
+      }
+    }
+  }, 200); // MUST match CSS duration
+}
+
+function fadeInContainer(container) {
+  requestAnimationFrame(() => {
+    container.style.opacity = 1;
+  });
+}
+
+function setupHoverEffects() {
+  const container = document.getElementById("project-list");
+
+  function attachHover(wrapper, index) {
+    if (wrapper.classList.contains("objects")) return; // objects handled by CSS
+
+    const previewImg = wrapper.querySelector(".project-preview");
+    const item = projects[index];
+    if (!item?.media?.length) return;
+
+    const defaultSrc = previewImg.src;
+    const hoverSrc = item.media[0].match(/\.(mp4|webm)$/)
+      ? item.media[0].replace(/\.(mp4|webm)$/, "-thumb.jpg")
+      : item.media[0];
+
+    wrapper.addEventListener("mouseenter", () => {
+      previewImg.src = hoverSrc;
+      previewImg.style.opacity = 0.7;
+      wrapper.querySelector(".project-title").style.opacity = 1;
+      wrapper.querySelector(".title-year").style.opacity = 1;
+    });
+
+    wrapper.addEventListener("mouseleave", () => {
+      previewImg.src = defaultSrc;
+      previewImg.style.opacity = 1;
+      wrapper.querySelector(".project-title").style.opacity = 0;
+      wrapper.querySelector(".title-year").style.opacity = 0;
+    });
+  }
+
+  const items = container.querySelectorAll(".project:not(.template)");
+  items.forEach((wrapper) => attachHover(wrapper, wrapper.dataset.index));
+}
+
+function setupProjectClickHandler() {
+  const container = document.getElementById("project-list");
+  const expandedMediaContainer = document.getElementById("expanded-media");
+  const zoomOverlay = document.getElementById("media-zoom-overlay");
+
+  if (!container) return;
+
+  container.addEventListener("click", (e) => {
+    const wrapper = e.target.closest(".project:not(.template)");
+    if (!wrapper) return;
+
+    const index = Number(wrapper.dataset.index);
+    if (Number.isNaN(index)) return;
+    const item = currentMode === "projects" ? projects[index] : objects[index];
+    if (!item) return;
+
+    openProjectOverlay(item, expandedMediaContainer, zoomOverlay);
+
+    // ✅ Push history for objects
+    if (currentMode === "objects") {
+      history.pushState(
+        { mode: "objects", objectIndex: index },
+        "",
+        `/objects/${item.slug}`
+      );
     }
   });
 }
@@ -117,68 +289,140 @@ function renderProjects(projects) {
   const expandedMediaContainer = document.getElementById("expanded-media");
   const zoomOverlay = document.getElementById("media-zoom-overlay");
 
+  container
+    .querySelectorAll(".project:not(.template)")
+    .forEach((el) => el.remove());
+
   // Generate all project elements once
   projects.forEach((project, index) => {
     const wrapper = template.cloneNode(true);
     wrapper.classList.remove("template");
     wrapper.style.display = "";
     wrapper.dataset.index = index;
+    // project number looks like this: ( x )
+    wrapper.querySelector(".project-number").textContent = `( ${index + 1} )`;
 
     wrapper.querySelector(".project-title").textContent = project.title;
     wrapper.querySelector(".title-year").textContent = project.year;
     wrapper.querySelector(".title-type").textContent = project.type;
 
+    const previewImg = document.createElement("img");
+    let thumbSrc = project.media[0];
+    if (thumbSrc.match(/\.(mp4|webm)$/)) {
+      thumbSrc = thumbSrc.replace(/\.(mp4|webm)$/, "-thumb.jpg");
+    }
+    previewImg.src = thumbSrc;
+    previewImg.alt = project.title;
+    previewImg.classList.add("project-preview");
+
+    wrapper.appendChild(previewImg);
+
     container.appendChild(wrapper);
   });
 
-  // === Event Delegation ===
-  // Hover Preview
-  container.addEventListener(
-    "mouseenter",
-    (e) => {
-      const wrapper = e.target.closest(".project");
-      if (!wrapper) return;
-
-      const project = projects[wrapper.dataset.index];
-      if (!project.media || !project.media.length) return;
-
-      const firstMedia = project.media[0];
-      const el = document.createElement("img");
-
-      if (firstMedia.match(/\.(mp4|webm)$/)) {
-        el.src = firstMedia.replace(/\.(mp4|webm)$/, "-thumb.jpg");
-      } else {
-        el.src = firstMedia;
-      }
-
-      el.alt = project.title;
-      expandedMediaContainer.innerHTML = "";
-      expandedMediaContainer.appendChild(el);
-      expandedMediaContainer.style.display = "block";
-    },
-    true
-  );
-
-  container.addEventListener(
-    "mouseleave",
-    (e) => {
-      const wrapper = e.target.closest(".project");
-      if (!wrapper) return;
-      expandedMediaContainer.style.display = "none";
-      expandedMediaContainer.innerHTML = "";
-    },
-    true
-  );
-
-  // Click to open overlay
-  container.addEventListener("click", (e) => {
-    const wrapper = e.target.closest(".project");
-    if (!wrapper) return;
-
-    const project = projects[wrapper.dataset.index];
-    openProjectOverlay(project, expandedMediaContainer, zoomOverlay);
-  });
+  // call after renderProjects
+  renderGridCrosses();
+  window.addEventListener("resize", renderGridCrosses);
 }
+
+function renderObjects(objects) {
+  const container = document.getElementById("project-list");
+  const template = container.querySelector(".project.template");
+
+  // Clear existing grid
+  container
+    .querySelectorAll(".project:not(.template)")
+    .forEach((el) => el.remove());
+
+  objects.forEach((obj, index) => {
+    const wrapper = template.cloneNode(true);
+    wrapper.classList.remove("template");
+    wrapper.classList.add("objects"); // new class for CSS targeting
+    wrapper.style.display = "";
+    wrapper.dataset.index = index;
+
+    // Add image first with fade-in
+    const img = document.createElement("img");
+    img.src = obj.media[0]; // main image URL
+    img.alt = obj.title || "";
+    img.classList.add("project-preview");
+    img.style.opacity = 0; // start hidden
+    wrapper.appendChild(img);
+
+    // Fade in once loaded (like hover preview)
+    img.onload = () => {
+      img.getBoundingClientRect(); // force reflow
+      requestAnimationFrame(() => {
+        img.style.transition = "opacity 0.5s ease"; // same as hover
+        img.style.opacity = 1;
+      });
+    };
+
+    // Add text overlay
+    const textOverlay = document.createElement("div");
+    textOverlay.classList.add("project-text");
+
+    const titleEl = document.createElement("div");
+    titleEl.classList.add("project-title");
+    titleEl.textContent = obj.title || "";
+    textOverlay.appendChild(titleEl);
+
+    const dimensionsEl = document.createElement("div");
+    dimensionsEl.classList.add("title-year");
+    dimensionsEl.textContent = obj.dimensions || "";
+    textOverlay.appendChild(dimensionsEl);
+
+    wrapper.appendChild(textOverlay);
+
+    container.appendChild(wrapper);
+  });
+
+  renderGridCrosses();
+  window.addEventListener("resize", renderGridCrosses);
+}
+
+function renderGridCrosses() {
+  const container = document.getElementById("project-list");
+  const crossesContainer = document.getElementById("grid-crosses");
+  crossesContainer.innerHTML = ""; // reset
+
+  const cells = Array.from(
+    container.querySelectorAll(".project:not(.template)")
+  );
+  if (!cells.length) return;
+
+  const columns = 5; // same as grid-template-columns
+  const rows = Math.ceil(cells.length / columns);
+
+  // Get container padding
+  const containerStyle = getComputedStyle(container);
+  const paddingLeft = parseFloat(containerStyle.paddingLeft) || 0;
+  const paddingTop = parseFloat(containerStyle.paddingTop) || 0;
+  const gapX = parseFloat(containerStyle.columnGap) || 0;
+  const gapY = parseFloat(containerStyle.rowGap) || 0;
+
+  // Get first cell dimensions for sizing
+  const refCell = cells[0];
+  const cellWidth = refCell.offsetWidth;
+  const cellHeight = refCell.offsetHeight;
+
+  for (let r = 0; r <= rows; r++) {
+    for (let c = 0; c <= columns; c++) {
+      const cross = document.createElement("div");
+      cross.classList.add("grid-cross");
+
+      // Calculate position relative to container, accounting for padding
+      const left = paddingLeft + c * (cellWidth + gapX);
+      const top = paddingTop + r * (cellHeight + gapY);
+
+      cross.style.left = left + "px";
+      cross.style.top = top + "px";
+
+      crossesContainer.appendChild(cross);
+    }
+  }
+}
+setupHoverEffects(); // initialize hover effects
 
 /* ==========================================================================
    Optimized Overlay + Slideshow Logic (full feature parity)
@@ -192,7 +436,12 @@ function openProjectOverlay(
   zoomOverlay,
   previewElement = null
 ) {
-  if (!project.media || !project.media.length) return;
+  isOverlayOpen = true;
+
+  if (!project || !Array.isArray(project.media) || !project.media.length) {
+    console.warn("Invalid project passed to overlay:", project);
+    return;
+  }
 
   // Close existing overlay if open
   if (activeOverlay && typeof activeOverlay.close === "function") {
@@ -226,6 +475,7 @@ function openProjectOverlay(
       el.autoplay = true;
       el.loop = true;
       el.muted = true;
+      el.controls = true;
     } else {
       el = document.createElement("img");
       el.src = src;
@@ -241,12 +491,37 @@ function openProjectOverlay(
   const slideCounter = document.getElementById("slide-counter");
   const overlayClose = document.getElementById("overlay-close");
 
-  overlayText.querySelector(".overlay-title").textContent = project.title;
-  overlayText.querySelector(".overlay-year").textContent = project.year;
-  overlayText.querySelector(".overlay-type").textContent = project.type;
-  overlayText.querySelector(".overlay-description").innerHTML = (
-    project.description || ""
-  ).replace(/\n/g, "<br>");
+  const titleEl = overlayText.querySelector(".overlay-title");
+  const yearEl = overlayText.querySelector(".overlay-year");
+  const typeEl = overlayText.querySelector(".overlay-type");
+  const descEl = overlayText.querySelector(".overlay-description");
+
+  titleEl.textContent = project.title || "";
+
+  // PROJECTS
+  if (currentMode === "projects") {
+    yearEl.textContent = project.year || "";
+    yearEl.style.display = "";
+
+    typeEl.textContent = project.type || "";
+    typeEl.style.display = "";
+
+    descEl.innerHTML = (project.description || "").replace(/\n/g, "<br>");
+    descEl.style.display = "";
+  }
+
+  // OBJECTS
+  // OBJECTS
+  else {
+    yearEl.textContent = "";
+    yearEl.style.display = "none";
+
+    typeEl.textContent = project.dimensions || "";
+    typeEl.style.display = "";
+
+    descEl.innerHTML = (project.description || "").replace(/\n/g, "<br>");
+    descEl.style.display = "";
+  }
 
   // Reset opacity (for fade-in)
   overlayText.style.opacity = 0;
@@ -260,15 +535,24 @@ function openProjectOverlay(
       (index + overlayState.slides.length) % overlayState.slides.length;
 
     overlayState.slides.forEach((slide, i) => {
+      const isActive = i === overlayState.currentIndex;
       slide.style.display = i === overlayState.currentIndex ? "block" : "none";
-      slide.style.position = "absolute";
-      slide.style.top = "0";
-      slide.style.left = "0";
-      slide.style.width = "100%";
-      slide.style.height = "100%";
-      slide.style.objectFit = "contain";
       slide.style.opacity = i === overlayState.currentIndex ? "1" : "0";
-      slide.style.transition = "opacity 0.4s ease";
+      slide.style.transition = "opacity 0.3s ease";
+
+      if (isActive) sizeMediaToViewport(slide);
+
+      if (slide.tagName === "VIDEO") {
+        if (isActive) {
+          // Play the video when active
+          slide.play().catch(() => {}); // .catch avoids autoplay-block errors
+        } else {
+          // Pause the video when inactive
+          slide.pause();
+          // Optional: reset to start
+          // slide.currentTime = 0;
+        }
+      }
     });
 
     slideCounter.textContent = `${overlayState.currentIndex + 1} / ${
@@ -280,100 +564,80 @@ function openProjectOverlay(
   history.pushState({ project: project.slug }, "", `/${project.slug}`);
 
   // --- Animate in from preview ---
-  const preview =
-    previewElement || expandedMediaContainer.querySelector("img, video");
-  const firstSlide = overlayState.slides[0];
-
-  const origRect = preview
-    ? preview.getBoundingClientRect()
-    : {
-        top: window.innerHeight / 2,
-        left: window.innerWidth / 2,
-        width: firstSlide.naturalWidth || 300,
-        height: firstSlide.naturalHeight || 200,
-      };
-  mediaWrapper.style.position = "absolute";
-  mediaWrapper.style.top = `${origRect.top}px`;
-  mediaWrapper.style.left = `${origRect.left}px`;
-  mediaWrapper.style.width = `${origRect.width}px`;
-  mediaWrapper.style.height = `${origRect.height}px`;
 
   // --- Activate overlay (same as info overlay pattern) ---
   zoomOverlay.classList.add("active");
-  zoomOverlay.getBoundingClientRect(); // force reflow for CSS transition timing
+  // zoomOverlay.getBoundingClientRect(); // force reflow for CSS transition timing
 
-  const vw = window.innerWidth;
-  const vh = window.innerHeight;
-  const marginX = vw * 0.21;
-  const availableW = vw - marginX * 2;
-  const availableH = vh * 0.8;
-  const ratio = origRect.width / origRect.height;
-
-  let finalW = availableW;
-  let finalH = finalW / ratio;
-  if (finalH > availableH) {
-    finalH = availableH;
-    finalW = finalH * ratio;
-  }
-
-  const targetTop = vh / 2 - finalH / 2;
-  const targetLeft = vw / 2 - finalW / 2;
-
-  requestAnimationFrame(() => {
-    mediaWrapper.style.top = `${targetTop}px`;
-    mediaWrapper.style.left = `${targetLeft}px`;
-    mediaWrapper.style.width = `${finalW}px`;
-    mediaWrapper.style.height = `${finalH}px`;
-  });
-  // --- Make media responsive on window resize ---
-  function handleResize() {
-    if (!zoomOverlay.classList.contains("active")) return;
-
+  function sizeMediaToViewport(slide) {
     const vw = window.innerWidth;
     const vh = window.innerHeight;
     const marginX = vw * 0.21;
-    const availableW = vw - marginX * 2;
-    const availableH = vh * 0.8;
-    const ratio = origRect.width / origRect.height;
+    const maxH = vh * 0.8; // 80% of viewport height
+    const maxW = vw - marginX * 2; // optional max width
 
-    let newW = availableW;
-    let newH = newW / ratio;
-    if (newH > availableH) {
-      newH = availableH;
-      newW = newH * ratio;
+    let intrinsicW = slide.naturalWidth || slide.videoWidth || 800;
+    let intrinsicH = slide.naturalHeight || slide.videoHeight || 600;
+    let ratio = intrinsicW / intrinsicH;
+
+    let finalW = intrinsicW;
+    let finalH = intrinsicH;
+
+    // First fit by height
+    if (finalH > maxH) {
+      finalH = maxH;
+      finalW = finalH * ratio;
     }
 
-    const newTop = vh / 2 - newH / 2;
-    const newLeft = vw / 2 - newW / 2;
+    // Then fit by width if too wide
+    if (finalW > maxW) {
+      finalW = maxW;
+      finalH = finalW / ratio;
+    }
 
-    mediaWrapper.style.top = `${newTop}px`;
-    mediaWrapper.style.left = `${newLeft}px`;
-    mediaWrapper.style.width = `${newW}px`;
-    mediaWrapper.style.height = `${newH}px`;
+    slide.style.position = "absolute";
+    slide.style.top = `${vh / 2 - finalH / 2}px`;
+    slide.style.left = `${vw / 2 - finalW / 2}px`;
+    slide.style.width = `${finalW}px`;
+    slide.style.height = `${finalH}px`;
+    slide.style.objectFit = "contain";
   }
 
+  // --- Make media responsive on window resize ---
+  function handleResize() {
+    if (!zoomOverlay.classList.contains("active")) return;
+    const slide = overlayState.slides[overlayState.currentIndex];
+    if (slide) sizeMediaToViewport(slide);
+  }
   window.addEventListener("resize", handleResize);
 
   // --- Fade in overlay text, close, and counter after slide zoom finishes ---
-  mediaWrapper.addEventListener(
-    "transitionend",
-    () => {
-      overlayText.style.transition = "opacity 0.3s ease";
-      overlayClose.style.transition = "opacity 0.3s ease";
-      slideCounter.style.transition = "opacity 0.3s ease";
+  // Immediately show overlay UI
+  overlayText.style.transition = "opacity 0.3s ease";
+  overlayClose.style.transition = "opacity 0.3s ease";
+  slideCounter.style.transition = "opacity 0.3s ease";
 
-      overlayText.getBoundingClientRect(); // force reflow
+  // force reflow
+  overlayText.getBoundingClientRect();
 
-      requestAnimationFrame(() => {
-        overlayText.style.opacity = 1;
-        overlayClose.style.opacity = 1;
-        slideCounter.style.opacity = 1;
-      });
+  requestAnimationFrame(() => {
+    overlayText.style.opacity = 1;
+    overlayClose.style.opacity = 1;
+    slideCounter.style.opacity = 1;
+  });
 
-      showSlide(0);
-    },
-    { once: true }
-  );
+  // Show first slide
+  // Show first slide correctly after it has loaded
+  const firstSlide = overlayState.slides[0];
+  if (firstSlide) {
+    if (firstSlide.tagName === "IMG") {
+      firstSlide.onload = () => showSlide(0);
+    } else if (firstSlide.tagName === "VIDEO") {
+      firstSlide.onloadedmetadata = () => showSlide(0);
+    }
+  } else {
+    showSlide(0);
+  }
 
   // --- Cursor update (unchanged) ---
   let cursorAnimationFrame = null;
@@ -385,6 +649,13 @@ function openProjectOverlay(
       document.body.classList.remove("cursor-left", "cursor-right");
       return;
     }
+
+    const hoveredEl = document.elementFromPoint(e.clientX, e.clientY);
+    if (hoveredEl && hoveredEl.tagName === "VIDEO") {
+      document.body.classList.remove("cursor-left", "cursor-right");
+      return;
+    }
+
     const marginTop = 80;
     const marginSides = 60;
     const withinY = e.clientY > marginTop;
@@ -473,6 +744,7 @@ function openProjectOverlay(
       mediaWrapper.remove();
       activeOverlay = null;
       cursorAnimationFrame = null;
+      isOverlayOpen = false;
       window.removeEventListener("resize", handleResize);
     };
 
@@ -492,14 +764,37 @@ window.addEventListener("popstate", (e) => {
   const zoomOverlay = document.getElementById("media-zoom-overlay");
   const infoOverlay = document.getElementById("info-overlay");
 
-  if (!e.state || (!e.state.project && !e.state.overlay)) {
-    // nothing specific: close all overlays
-    if (activeOverlay) activeOverlay.close(true);
-    if (infoOverlay.classList.contains("active")) {
-      closeInfoOverlay(false);
+  const path = window.location.pathname.slice(1); // current path
+
+  // Handle info overlay
+  if (e.state?.overlay === "info") {
+    openInfoOverlay(false);
+    return;
+  }
+
+  // Close any active overlay first
+  if (activeOverlay) activeOverlay.close(true);
+  if (infoOverlay.classList.contains("active")) closeInfoOverlay(false);
+
+  // Restore objects
+  if (e.state?.mode === "objects" || path.startsWith("objects")) {
+    setMode("objects");
+
+    // If the URL has a specific object, open overlay
+    const slug = path.split("/")[1]; // second part after "/objects/"
+    if (slug) {
+      const index = objects.findIndex((o) => o.slug === slug);
+      if (index >= 0) {
+        const obj = objects[index];
+        openProjectOverlay(obj, expandedMediaContainer, zoomOverlay);
+      }
     }
-  } else if (e.state.project) {
-    // rebuild project overlay
+
+    return;
+  }
+
+  // Restore project overlay if state exists
+  if (e.state?.project) {
     const projectSlug = e.state.project;
     const project = projects.find((p) => p.slug === projectSlug);
     if (!project) return;
@@ -509,8 +804,9 @@ window.addEventListener("popstate", (e) => {
       )}"] img, .project[data-index="${projects.indexOf(project)}"] video`
     );
     openProjectOverlay(project, expandedMediaContainer, zoomOverlay, preview);
-  } else if (e.state.overlay === "info") {
-    // open info overlay
-    openInfoOverlay(false);
+    return;
   }
+
+  // Default to projects
+  setMode("projects");
 });

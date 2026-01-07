@@ -36,7 +36,7 @@
     "title": "Hello World",
     "type": "3D Animation",
     "year": "2024",
-    "description": "Music clip for “Hello World” by Rouge Hotel, unfolding a story through puppet-like animated figures.",
+    "description": "Music clip for “Hello World” by Rouge Hotel, unfolding a story through puppet-like animated figures.\nIn collaboration with Elena Biasi.",
     "media": ["images/hello1.mp4", "images/hello2.png", "images/hello3.png", "images/hello4.png"],
     "slug": "hello-world"
   },
